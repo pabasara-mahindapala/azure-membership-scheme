@@ -16,6 +16,11 @@
 
 package org.wso2.carbon.membership.scheme.azure;
 
+import com.azure.resourcemanager.compute.ComputeManager;
+import com.azure.resourcemanager.compute.models.PowerState;
+import com.azure.resourcemanager.compute.models.VirtualMachine;
+import com.azure.resourcemanager.network.models.NetworkInterface;
+import com.azure.resourcemanager.network.models.NicIpConfiguration;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
@@ -23,17 +28,18 @@ import com.hazelcast.core.*;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.description.Parameter;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.core.clustering.hazelcast.HazelcastCarbonClusterImpl;
 import org.wso2.carbon.core.clustering.hazelcast.HazelcastMembershipScheme;
 import org.wso2.carbon.core.clustering.hazelcast.HazelcastUtil;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
-import org.wso2.carbon.membership.scheme.azure.resolver.AddressResolver;
 
 import java.net.Inet4Address;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -48,7 +54,6 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     private final List<ClusteringMessage> messageBuffer;
     private HazelcastInstance primaryHazelcastInstance;
     private HazelcastCarbonClusterImpl carbonCluster;
-    private AddressResolver podIpResolver;
 
     public AzureMembershipScheme(Map<String, Parameter> parameters, String primaryDomain, Config config,
                                  HazelcastInstance primaryHazelcastInstance, List<ClusteringMessage> messageBuffer) {
@@ -73,7 +78,25 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     }
 
     private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException {
-        throw new NotImplementedException();
+        ComputeManager computeManager = ComputeManagerHelper.getComputeManager();
+
+        Iterable<VirtualMachine> virtualMachines = computeManager.virtualMachines().listByResourceGroup(Constants.RESOURCE_GROUP_NAME);
+
+        HashSet<String> ipAddresses = new HashSet<>();
+        for (VirtualMachine virtualMachine : virtualMachines) {
+            // skip any deallocated vms
+            if (!PowerState.RUNNING.equals(virtualMachine.powerState())) {
+                continue;
+            }
+
+            NetworkInterface networkInterface = virtualMachine.getPrimaryNetworkInterface();
+            for (NicIpConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
+                String publicIP = ipConfiguration.getPublicIpAddress().ipAddress();
+                ipAddresses.add(publicIP);
+            }
+        }
+
+        return ipAddresses;
     }
 
     @Override

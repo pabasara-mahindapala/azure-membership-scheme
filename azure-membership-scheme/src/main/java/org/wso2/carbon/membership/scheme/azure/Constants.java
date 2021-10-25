@@ -17,5 +17,10 @@
 package org.wso2.carbon.membership.scheme.azure;
 
 public class Constants {
-
+    public static final String RESOURCE_GROUP_NAME = "";
+    public static final String SCALE_SET_ID = "";
+    public static final String CLIENT_ID = "";
+    public static final String CLIENT_SECRET = "";
+    public static final String TENANT_ID = "";
+    public static final String SUBSCRIPTION_ID = "";
 }
