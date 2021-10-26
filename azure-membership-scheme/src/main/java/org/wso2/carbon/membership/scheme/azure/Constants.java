@@ -16,11 +16,15 @@
 
 package org.wso2.carbon.membership.scheme.azure;
 
+import java.util.Collections;
+import java.util.Set;
+
 public class Constants {
     public static final String RESOURCE_GROUP_NAME = "";
-    public static final String SCALE_SET_ID = "";
     public static final String CLIENT_ID = "";
     public static final String CLIENT_SECRET = "";
-    public static final String TENANT_ID = "";
+    public static final String TENANT = "";
     public static final String SUBSCRIPTION_ID = "";
+    public static final String INSTANCE = "https://login.microsoftonline.com/%s/";
+    public static final Set<String> MANAGEMENT_DEFAULT_SCOPE = Collections.singleton("https://management.azure.com/.default");
 }

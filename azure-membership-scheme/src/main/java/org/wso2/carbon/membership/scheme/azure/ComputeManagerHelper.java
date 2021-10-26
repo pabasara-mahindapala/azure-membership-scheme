@@ -28,12 +28,12 @@ import com.azure.resourcemanager.compute.ComputeManager;
 public class ComputeManagerHelper {
 
     public static ComputeManager getComputeManager() {
-        AzureProfile profile = new AzureProfile(Constants.TENANT_ID, Constants.SUBSCRIPTION_ID, AzureEnvironment.AZURE);
+        AzureProfile profile = new AzureProfile(Constants.TENANT, Constants.SUBSCRIPTION_ID, AzureEnvironment.AZURE);
 
         ClientSecretCredential credential = new ClientSecretCredentialBuilder()
                 .clientId(Constants.CLIENT_ID)
                 .clientSecret(Constants.CLIENT_SECRET)
-                .tenantId(Constants.TENANT_ID)
+                .tenantId(Constants.TENANT)
                 .build();
 
         return ComputeManager.authenticate(credential, profile);
