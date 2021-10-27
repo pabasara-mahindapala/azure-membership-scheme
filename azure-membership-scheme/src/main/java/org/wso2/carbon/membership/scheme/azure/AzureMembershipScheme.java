@@ -16,11 +16,6 @@
 
 package org.wso2.carbon.membership.scheme.azure;
 
-import com.azure.resourcemanager.compute.ComputeManager;
-import com.azure.resourcemanager.compute.models.PowerState;
-import com.azure.resourcemanager.compute.models.VirtualMachine;
-import com.azure.resourcemanager.network.models.NetworkInterface;
-import com.azure.resourcemanager.network.models.NicIpConfiguration;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
@@ -34,9 +29,13 @@ import org.wso2.carbon.core.clustering.hazelcast.HazelcastCarbonClusterImpl;
 import org.wso2.carbon.core.clustering.hazelcast.HazelcastMembershipScheme;
 import org.wso2.carbon.core.clustering.hazelcast.HazelcastUtil;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
+import org.wso2.carbon.membership.scheme.azure.resolver.AddressResolver;
+import org.wso2.carbon.membership.scheme.azure.resolver.ApiBasedIpResolver;
+import org.wso2.carbon.membership.scheme.azure.resolver.SdkBasedIpResolver;
+import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.net.Inet4Address;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +53,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     private final List<ClusteringMessage> messageBuffer;
     private HazelcastInstance primaryHazelcastInstance;
     private HazelcastCarbonClusterImpl carbonCluster;
+    private AddressResolver ipResolver;
 
     public AzureMembershipScheme(Map<String, Parameter> parameters, String primaryDomain, Config config,
                                  HazelcastInstance primaryHazelcastInstance, List<ClusteringMessage> messageBuffer) {
@@ -77,26 +77,29 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
         this.carbonCluster = hazelcastCarbonCluster;
     }
 
-    private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException {
-        ComputeManager computeManager = ComputeManagerHelper.getComputeManager();
+    /**
+     * Initiates the IP resolver.
+     * Uses the SDK based IP resolver or the REST API based IP resolver.
+     */
+    private void initIpResolver() throws AzureMembershipSchemeException {
+        String useSDK = Constants.USE_SDK;
 
-        Iterable<VirtualMachine> virtualMachines = computeManager.virtualMachines().listByResourceGroup(Constants.RESOURCE_GROUP_NAME);
-
-        HashSet<String> ipAddresses = new HashSet<>();
-        for (VirtualMachine virtualMachine : virtualMachines) {
-            // skip any deallocated vms
-            if (!PowerState.RUNNING.equals(virtualMachine.powerState())) {
-                continue;
-            }
-
-            NetworkInterface networkInterface = virtualMachine.getPrimaryNetworkInterface();
-            for (NicIpConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
-                String publicIP = ipConfiguration.getPublicIpAddress().ipAddress();
-                ipAddresses.add(publicIP);
-            }
+        if (StringUtils.isEmpty(useSDK) || !Boolean.parseBoolean(useSDK)) {
+            log.debug("Using API based ip resolving method");
+            ipResolver = new ApiBasedIpResolver(parameters);
+        } else {
+            log.debug("Using SDK based ip resolving method");
+            ipResolver = new SdkBasedIpResolver(parameters);
         }
+    }
 
-        return ipAddresses;
+    private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException {
+        Set<String> azureIPs = ipResolver.resolveAddresses();
+        if (azureIPs != null) {
+            return azureIPs;
+        } else {
+            return Collections.emptySet();
+        }
     }
 
     @Override
@@ -107,6 +110,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
             nwConfig.getJoin().getAwsConfig().setEnabled(false);
             TcpIpConfig tcpIpConfig = nwConfig.getJoin().getTcpIpConfig();
             tcpIpConfig.setEnabled(true);
+            initIpResolver();
             Set<String> azureIPs = getAzureIpAddresses();
             // if no IPs are found, can't initialize clustering
             if (azureIPs.isEmpty()) {
