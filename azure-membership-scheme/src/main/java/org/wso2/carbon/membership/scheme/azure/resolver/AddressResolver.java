@@ -21,6 +21,7 @@ import org.wso2.carbon.membership.scheme.azure.Constants;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 import org.wso2.carbon.utils.xml.StringUtils;
 
+import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,22 +31,9 @@ import java.util.Set;
 public abstract class AddressResolver {
 
     private final Map<String, Parameter> parameters;
-    private String kubernetesNamespace;
-    private String kubernetesServices;
-    private String[] kubernetesServicesArray;
 
     AddressResolver(final Map<String, Parameter> parameters) throws AzureMembershipSchemeException {
         this.parameters = parameters;
-        initialize();
-    }
-
-    /**
-     * Initialize AddressResolver instance
-     *
-     * @throws AzureMembershipSchemeException if an error occurred while initializing
-     */
-    private void initialize() throws AzureMembershipSchemeException {
-
     }
 
     /**

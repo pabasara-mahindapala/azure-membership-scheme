@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.Scanner;
 
 public abstract class AzureApiEndpoint {
 
@@ -38,27 +38,18 @@ public abstract class AzureApiEndpoint {
 
     public abstract void createConnection() throws IOException;
 
-    public abstract void createConnection(String username, String password) throws IOException;
-
-
-    public InputStream read() throws IOException {
-        return connection.getInputStream();
-    }
-
     public abstract void disconnect();
 
-    public void createConnection(String token) throws IOException {
-        String tokenAuth = "Bearer " + token;
-        connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Authorization", tokenAuth);
-    }
+    public String read() throws IOException {
+        InputStream stream;
+        stream = connection.getInputStream();
 
-    void createBasicAuthenticationHeader(String username, String password) {
-        log.debug("Generating basic auth header...");
-        String userpass = username + ":" + password;
-        String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.
-                printBase64Binary(userpass.getBytes(StandardCharsets.UTF_8));
-        connection.setRequestProperty("Authorization", basicAuth);
-        log.debug("Basic auth header generated");
+        if (stream == null) {
+            return null;
+        }
+
+        Scanner scanner = new Scanner(stream, "UTF-8");
+        scanner.useDelimiter("\\Z");
+        return scanner.next();
     }
 }

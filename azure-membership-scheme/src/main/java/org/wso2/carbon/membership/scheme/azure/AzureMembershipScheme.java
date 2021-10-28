@@ -35,6 +35,7 @@ import org.wso2.carbon.membership.scheme.azure.resolver.SdkBasedIpResolver;
 import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.net.Inet4Address;
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
         }
     }
 
-    private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException {
+    private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException, MalformedURLException {
         Set<String> azureIPs = ipResolver.resolveAddresses();
         if (azureIPs != null) {
             return azureIPs;
@@ -201,7 +202,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
                         log.debug(String.format("Current member list: %s", tcpIpConfig.getMembers()));
                     }
                 }
-            } catch (AzureMembershipSchemeException e) {
+            } catch (AzureMembershipSchemeException | MalformedURLException e) {
                 log.error("Could not remove member: " + memberIp, e);
             }
         }

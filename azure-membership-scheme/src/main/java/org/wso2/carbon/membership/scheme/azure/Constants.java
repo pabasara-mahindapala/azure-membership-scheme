@@ -27,5 +27,8 @@ public class Constants {
     public static final String SUBSCRIPTION_ID = "";
     public static final String INSTANCE = "https://login.microsoftonline.com/%s/";
     public static final Set<String> MANAGEMENT_DEFAULT_SCOPE = Collections.singleton("https://management.azure.com/.default");
-    public static final String USE_SDK = "false";
+    public static final String USE_SDK = "";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String API_VERSION = "2018-08-01";
+    public static final String AZURE_API_ENDPOINT = "https://management.azure.com";
 }
