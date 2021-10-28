@@ -56,7 +56,14 @@ public class ApiBasedIpResolver extends AddressResolver {
         }
         AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint(apiEndpointUrl);
 
-        Set<String> publicIps = parsePublicIpResponse(connectAndRead(apiEndpoint));
+        Set<String> publicIps;
+
+        try {
+            publicIps = parsePublicIpResponse(connectAndRead(apiEndpoint));
+        } finally {
+            apiEndpoint.disconnect();
+        }
+
         if (!publicIps.isEmpty()) {
             return publicIps;
         } else {
