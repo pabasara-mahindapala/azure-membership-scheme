@@ -46,10 +46,14 @@ public class SdkBasedIpResolver extends AddressResolver {
         initialize();
     }
 
-    private void initialize() {
-        AzureProfile profile = AzureAuthenticator.getAzureProfile();
-        TokenCredential credential = AzureAuthenticator.getClientSecretCredential();
-        computeManager = ComputeManager.authenticate(credential, profile);
+    private void initialize() throws AzureMembershipSchemeException {
+        try {
+            AzureProfile profile = AzureAuthenticator.getAzureProfile();
+            TokenCredential credential = AzureAuthenticator.getClientSecretCredential();
+            computeManager = ComputeManager.authenticate(credential, profile);
+        } catch (Exception e) {
+            throw new AzureMembershipSchemeException("Failed to authenticate azure ComputeManager", e);
+        }
     }
 
     @Override

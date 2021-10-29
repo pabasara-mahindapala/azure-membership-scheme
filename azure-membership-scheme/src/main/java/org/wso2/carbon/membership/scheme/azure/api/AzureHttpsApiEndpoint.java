@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.membership.scheme.azure.AzureAuthenticator;
 import org.wso2.carbon.membership.scheme.azure.Constants;
+import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
     }
 
     @Override
-    public void createConnection() throws IOException {
+    public void createConnection() throws IOException, AzureMembershipSchemeException {
         log.debug("Connecting to Azure API server...");
         connection = (HttpsURLConnection) url.openConnection();
         connection.addRequestProperty(Constants.AUTHORIZATION_HEADER, "Bearer " + getAccessToken());
@@ -49,7 +50,11 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
         log.debug("Disconnected successfully");
     }
 
-    private String getAccessToken() throws MalformedURLException {
-        return AzureAuthenticator.acquireToken().accessToken();
+    private String getAccessToken() throws AzureMembershipSchemeException {
+        try {
+            return AzureAuthenticator.acquireToken().accessToken();
+        } catch (MalformedURLException e) {
+            throw new AzureMembershipSchemeException("Failed to acquire azure access token", e);
+        }
     }
 }

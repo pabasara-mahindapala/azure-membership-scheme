@@ -18,6 +18,7 @@ package org.wso2.carbon.membership.scheme.azure.api;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +37,7 @@ public abstract class AzureApiEndpoint {
         this.url = url;
     }
 
-    public abstract void createConnection() throws IOException;
+    public abstract void createConnection() throws IOException, AzureMembershipSchemeException;
 
     public abstract void disconnect();
 
