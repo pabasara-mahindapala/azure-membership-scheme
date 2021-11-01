@@ -42,10 +42,14 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
     }
 
     @Override
-    public void createConnection() throws IOException, AzureMembershipSchemeException {
+    public void createConnection() throws AzureMembershipSchemeException {
 
         log.debug("Connecting to Azure API server...");
-        connection = (HttpsURLConnection) url.openConnection();
+        try {
+            connection = (HttpsURLConnection) url.openConnection();
+        } catch (IOException e) {
+            throw new AzureMembershipSchemeException("Failed to open connection", e);
+        }
         connection.addRequestProperty(Constants.AUTHORIZATION_HEADER, "Bearer " + getAccessToken());
         log.debug("Connected successfully");
     }

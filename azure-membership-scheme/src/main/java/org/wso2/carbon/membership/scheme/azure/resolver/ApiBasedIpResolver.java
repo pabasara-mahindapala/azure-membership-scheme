@@ -77,11 +77,7 @@ public class ApiBasedIpResolver extends AddressResolver {
 
     private String connectAndRead(AzureApiEndpoint endpoint) throws AzureMembershipSchemeException {
 
-        try {
-            endpoint.createConnection();
-        } catch (IOException e) {
-            throw new AzureMembershipSchemeException("Could not connect to Azure API", e);
-        }
+        endpoint.createConnection();
 
         try {
             return endpoint.read();

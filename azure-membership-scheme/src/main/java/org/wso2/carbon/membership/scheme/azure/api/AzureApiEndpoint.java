@@ -39,7 +39,7 @@ public abstract class AzureApiEndpoint {
         this.url = url;
     }
 
-    public abstract void createConnection() throws IOException, AzureMembershipSchemeException;
+    public abstract void createConnection() throws AzureMembershipSchemeException;
 
     public abstract void disconnect();
 

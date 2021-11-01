@@ -42,6 +42,7 @@ import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.net.Inet4Address;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
         }
     }
 
-    private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException, MalformedURLException {
+    private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException {
 
         Set<String> azureIPs = ipResolver.resolveAddresses();
         if (azureIPs != null) {
@@ -138,36 +139,17 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
                 }
             }
             log.info("Azure membership scheme initialized successfully");
-        } catch (Exception e) {
+        } catch (UnknownHostException | AzureMembershipSchemeException e) {
             String errorMsg = "Azure membership initialization failed";
             log.error(errorMsg, e);
             throw new ClusteringFault(errorMsg, e);
         }
     }
 
-    private String getParameterValue(String parameterName, String defaultValue) throws
-            AzureMembershipSchemeException {
-
-        Parameter azureServicesParam = getParameter(parameterName);
-        if (azureServicesParam == null) {
-            if (defaultValue == null) {
-                throw new AzureMembershipSchemeException(parameterName + " parameter not found");
-            } else {
-                return defaultValue;
-            }
-        }
-        return (String) azureServicesParam.getValue();
-    }
-
     @Override
     public void joinGroup() {
 
         primaryHazelcastInstance.getCluster().addMembershipListener(new AzureMembershipSchemeListener());
-    }
-
-    private Parameter getParameter(String name) {
-
-        return parameters.get(name);
     }
 
     /**
@@ -219,7 +201,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
                         log.debug(String.format("Current member list: %s", tcpIpConfig.getMembers()));
                     }
                 }
-            } catch (AzureMembershipSchemeException | MalformedURLException e) {
+            } catch (AzureMembershipSchemeException e) {
                 log.error(String.format("Could not remove member: %s", memberIp), e);
             }
         }
