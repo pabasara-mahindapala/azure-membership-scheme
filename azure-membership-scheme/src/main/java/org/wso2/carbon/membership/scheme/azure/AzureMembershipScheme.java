@@ -1,17 +1,19 @@
 /*
- * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.com).
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.membership.scheme.azure;
@@ -19,7 +21,11 @@ package org.wso2.carbon.membership.scheme.azure;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
-import com.hazelcast.core.*;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
+import com.hazelcast.core.MemberAttributeEvent;
+import com.hazelcast.core.MembershipEvent;
+import com.hazelcast.core.MembershipListener;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.ClusteringMessage;
 import org.apache.axis2.description.Parameter;
@@ -41,7 +47,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 /**
  * Azure membership scheme provides carbon cluster discovery on azure.
  */
@@ -56,8 +61,9 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     private HazelcastCarbonClusterImpl carbonCluster;
     private AddressResolver ipResolver;
 
-    public AzureMembershipScheme(Map<String, Parameter> parameters, String primaryDomain, Config config,
+    public AzureMembershipScheme(Map<String, Parameter> parameters, Config config,
                                  HazelcastInstance primaryHazelcastInstance, List<ClusteringMessage> messageBuffer) {
+
         this.parameters = parameters;
         this.primaryHazelcastInstance = primaryHazelcastInstance;
         this.messageBuffer = messageBuffer;
@@ -66,15 +72,18 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
 
     @Override
     public void setPrimaryHazelcastInstance(HazelcastInstance primaryHazelcastInstance) {
+
         this.primaryHazelcastInstance = primaryHazelcastInstance;
     }
 
     @Override
     public void setLocalMember(Member localMember) {
+
     }
 
     @Override
     public void setCarbonCluster(HazelcastCarbonClusterImpl hazelcastCarbonCluster) {
+
         this.carbonCluster = hazelcastCarbonCluster;
     }
 
@@ -83,6 +92,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
      * Uses the SDK based IP resolver or the REST API based IP resolver.
      */
     private void initIpResolver() throws AzureMembershipSchemeException {
+
         String useSDK = Constants.USE_SDK;
 
         if (StringUtils.isEmpty(useSDK) || !Boolean.parseBoolean(useSDK)) {
@@ -95,6 +105,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     }
 
     private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException, MalformedURLException {
+
         Set<String> azureIPs = ipResolver.resolveAddresses();
         if (azureIPs != null) {
             return azureIPs;
@@ -105,6 +116,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
 
     @Override
     public void init() throws ClusteringFault {
+
         try {
             log.info("Initializing azure membership scheme...");
             nwConfig.getJoin().getMulticastConfig().setEnabled(false);
@@ -135,6 +147,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
 
     private String getParameterValue(String parameterName, String defaultValue) throws
             AzureMembershipSchemeException {
+
         Parameter azureServicesParam = getParameter(parameterName);
         if (azureServicesParam == null) {
             if (defaultValue == null) {
@@ -148,20 +161,23 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
 
     @Override
     public void joinGroup() {
+
         primaryHazelcastInstance.getCluster().addMembershipListener(new AzureMembershipSchemeListener());
     }
 
     private Parameter getParameter(String name) {
+
         return parameters.get(name);
     }
 
     /**
-     * Azure membership scheme listener
+     * Azure membership scheme listener.
      */
     private class AzureMembershipSchemeListener implements MembershipListener {
 
         @Override
         public void memberAdded(MembershipEvent membershipEvent) {
+
             Member member = membershipEvent.getMember();
             TcpIpConfig tcpIpConfig = nwConfig.getJoin().getTcpIpConfig();
             List<String> memberList = tcpIpConfig.getMembers();
@@ -186,6 +202,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
 
         @Override
         public void memberRemoved(MembershipEvent membershipEvent) {
+
             Member member = membershipEvent.getMember();
             carbonCluster.memberRemoved(member);
             TcpIpConfig tcpIpConfig = nwConfig.getJoin().getTcpIpConfig();
@@ -203,12 +220,13 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
                     }
                 }
             } catch (AzureMembershipSchemeException | MalformedURLException e) {
-                log.error("Could not remove member: " + memberIp, e);
+                log.error(String.format("Could not remove member: %s", memberIp), e);
             }
         }
 
         @Override
         public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
+
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Member attribute changed: [Key] %s, [Value] %s", memberAttributeEvent.getKey(),
                         memberAttributeEvent.getValue()));
