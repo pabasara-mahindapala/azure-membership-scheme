@@ -31,22 +31,20 @@ import java.util.Scanner;
  */
 public abstract class AzureApiEndpoint {
 
-    URL url;
     HttpURLConnection connection;
-
-    AzureApiEndpoint(URL url) {
-
-        this.url = url;
-    }
 
     public abstract void createConnection() throws AzureMembershipSchemeException;
 
     public abstract void disconnect();
 
+    public abstract URL getEndpoint();
+
     public String read() throws IOException {
 
-        InputStream stream;
-        stream = connection.getInputStream();
+        InputStream stream = null;
+        if (connection != null) {
+            stream = connection.getInputStream();
+        }
 
         if (stream == null) {
             return null;
@@ -56,4 +54,5 @@ public abstract class AzureApiEndpoint {
         scanner.useDelimiter("\\Z");
         return scanner.next();
     }
+
 }

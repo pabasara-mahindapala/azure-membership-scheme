@@ -44,16 +44,19 @@ public class Constants {
      */
     public enum ErrorMessage {
 
-        COULD_NOT_BUILD_CCA("00001", "Could not build ConfidentialClientApplication.",
+        // Client error codes.
+        COULD_NOT_BUILD_CCA("60001", "Could not build ConfidentialClientApplication.",
                 "Could not build ConfidentialClientApplication."),
-        FAILED_TO_CONNECT("00002", "Failed to open connection.", "Failed to open connection."),
-        NO_MEMBERS_FOUND("00003", "No members found.",
+        FAILED_TO_CONNECT("60002", "Failed to open connection.", "Failed to open connection."),
+        NO_MEMBERS_FOUND("60003", "No members found.",
                 "No members found, unable to initialize the Azure membership scheme."),
-        PARAMETER_NOT_FOUND("00004", "Parameter not found.", "'%s' parameter not found."),
-        NO_IPS_FOUND("00005", "No IPs found", "No IPs found at '%s'"),
-        COULD_NOT_READ_API("00006", "Could not read from Azure API", "Could not read from Azure API"),
-        COULD_NOT_CREATE_URL("00007", "Could not create endpoint URL", "Could not create endpoint URL"),
-        FAILED_TO_AUTHENTICATE_COMPUTEMANAGER("00008", "Failed to authenticate azure ComputeManager",
+        PARAMETER_NOT_FOUND("60004", "Parameter not found.", "'%s' parameter not found."),
+        NO_IPS_FOUND("60005", "No IPs found", "No IPs found at '%s'"),
+        COULD_NOT_CREATE_URL("60006", "Could not create endpoint URL", "Could not create endpoint URL"),
+
+        // Server error codes.
+        COULD_NOT_READ_API("65001", "Could not read from Azure API", "Could not read from Azure API"),
+        FAILED_TO_AUTHENTICATE_COMPUTEMANAGER("65002", "Failed to authenticate azure ComputeManager",
                 "Failed to authenticate azure ComputeManager");
 
         private final String code;

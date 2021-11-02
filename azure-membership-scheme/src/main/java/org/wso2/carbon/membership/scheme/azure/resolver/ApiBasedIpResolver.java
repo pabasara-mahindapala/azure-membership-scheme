@@ -32,8 +32,6 @@ import org.wso2.carbon.membership.scheme.azure.api.AzureHttpsApiEndpoint;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -53,13 +51,7 @@ public class ApiBasedIpResolver extends AddressResolver {
     @Override
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
-        URL apiEndpointUrl;
-        try {
-            apiEndpointUrl = new URL(urlForIpList());
-        } catch (MalformedURLException e) {
-            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, null, e);
-        }
-        AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint(apiEndpointUrl);
+        AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint();
 
         Set<String> publicIps;
 
@@ -73,7 +65,7 @@ public class ApiBasedIpResolver extends AddressResolver {
             log.debug(String.format("Found %s IP addresses", publicIps.size()));
             return publicIps;
         } else {
-            throw Utils.handleException(Constants.ErrorMessage.NO_IPS_FOUND, apiEndpointUrl.toString());
+            throw Utils.handleException(Constants.ErrorMessage.NO_IPS_FOUND, apiEndpoint.getEndpoint().toString());
         }
     }
 
@@ -86,13 +78,6 @@ public class ApiBasedIpResolver extends AddressResolver {
         } catch (IOException e) {
             throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_READ_API, null, e);
         }
-    }
-
-    private String urlForIpList() {
-
-        return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
-                        + "/publicIPAddresses?api-version=%s", Constants.AZURE_API_ENDPOINT, Constants.SUBSCRIPTION_ID,
-                Constants.RESOURCE_GROUP_NAME, Constants.API_VERSION);
     }
 
     private Set<String> parsePublicIpResponse(String response) {

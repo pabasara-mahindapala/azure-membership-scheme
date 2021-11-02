@@ -26,6 +26,7 @@ import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -35,19 +36,23 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
 
+    private URL endpoint;
     private static final Log log = LogFactory.getLog(AzureHttpsApiEndpoint.class);
-
-    public AzureHttpsApiEndpoint(URL url) {
-
-        super(url);
-    }
 
     @Override
     public void createConnection() throws AzureMembershipSchemeException {
 
+        URL url;
+        try {
+            url = new URL(urlForIpList());
+        } catch (MalformedURLException e) {
+            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, null, e);
+        }
+
         log.debug("Connecting to Azure API server...");
         try {
             connection = (HttpsURLConnection) url.openConnection();
+            this.endpoint = url;
         } catch (IOException e) {
             throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_CONNECT, null, e);
         }
@@ -59,12 +64,26 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
     public void disconnect() {
 
         log.debug("Disconnecting from Azure API server...");
-        connection.disconnect();
+        if (connection != null) {
+            connection.disconnect();
+        }
         log.debug("Disconnected successfully");
     }
 
     private String getAccessToken() throws AzureMembershipSchemeException {
 
         return AzureAuthenticator.acquireToken().accessToken();
+    }
+
+    private String urlForIpList() {
+
+        return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
+                        + "/publicIPAddresses?api-version=%s", Constants.AZURE_API_ENDPOINT, Constants.SUBSCRIPTION_ID,
+                Constants.RESOURCE_GROUP_NAME, Constants.API_VERSION);
+    }
+
+    public URL getEndpoint() {
+
+        return endpoint;
     }
 }
