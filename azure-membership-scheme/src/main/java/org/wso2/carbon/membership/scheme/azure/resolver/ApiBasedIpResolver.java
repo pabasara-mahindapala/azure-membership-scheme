@@ -26,6 +26,7 @@ import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.membership.scheme.azure.Constants;
+import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.api.AzureApiEndpoint;
 import org.wso2.carbon.membership.scheme.azure.api.AzureHttpsApiEndpoint;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
@@ -44,7 +45,7 @@ public class ApiBasedIpResolver extends AddressResolver {
 
     private static final Log log = LogFactory.getLog(ApiBasedIpResolver.class);
 
-    public ApiBasedIpResolver(final Map<String, Parameter> parameters) throws AzureMembershipSchemeException {
+    public ApiBasedIpResolver(final Map<String, Parameter> parameters) {
 
         super(parameters);
     }
@@ -56,7 +57,7 @@ public class ApiBasedIpResolver extends AddressResolver {
         try {
             apiEndpointUrl = new URL(urlForIpList());
         } catch (MalformedURLException e) {
-            throw new AzureMembershipSchemeException("Could not create endpoint URL", e);
+            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, null, e);
         }
         AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint(apiEndpointUrl);
 
@@ -69,9 +70,10 @@ public class ApiBasedIpResolver extends AddressResolver {
         }
 
         if (!publicIps.isEmpty()) {
+            log.debug(String.format("Found %s IP addresses", publicIps.size()));
             return publicIps;
         } else {
-            throw new AzureMembershipSchemeException("No IPs found at " + apiEndpointUrl.toString());
+            throw Utils.handleException(Constants.ErrorMessage.NO_IPS_FOUND, apiEndpointUrl.toString());
         }
     }
 
@@ -82,7 +84,7 @@ public class ApiBasedIpResolver extends AddressResolver {
         try {
             return endpoint.read();
         } catch (IOException e) {
-            throw new AzureMembershipSchemeException("Could not read from Azure API", e);
+            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_READ_API, null, e);
         }
     }
 

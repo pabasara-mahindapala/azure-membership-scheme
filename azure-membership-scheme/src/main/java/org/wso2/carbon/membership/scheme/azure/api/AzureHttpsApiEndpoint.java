@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.membership.scheme.azure.AzureAuthenticator;
 import org.wso2.carbon.membership.scheme.azure.Constants;
+import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
         try {
             connection = (HttpsURLConnection) url.openConnection();
         } catch (IOException e) {
-            throw new AzureMembershipSchemeException("Failed to open connection", e);
+            throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_CONNECT, null, e);
         }
         connection.addRequestProperty(Constants.AUTHORIZATION_HEADER, "Bearer " + getAccessToken());
         log.debug("Connected successfully");

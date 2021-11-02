@@ -38,4 +38,53 @@ public class Constants {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String API_VERSION = "2021-03-01";
     public static final String AZURE_API_ENDPOINT = "https://management.azure.com";
+
+    /**
+     * EMAIL OTP service error codes.
+     */
+    public enum ErrorMessage {
+
+        COULD_NOT_BUILD_CCA("00001", "Could not build ConfidentialClientApplication.",
+                "Could not build ConfidentialClientApplication."),
+        FAILED_TO_CONNECT("00002", "Failed to open connection.", "Failed to open connection."),
+        NO_MEMBERS_FOUND("00003", "No members found.",
+                "No members found, unable to initialize the Azure membership scheme."),
+        PARAMETER_NOT_FOUND("00004", "Parameter not found.", "'%s' parameter not found."),
+        NO_IPS_FOUND("00005", "No IPs found", "No IPs found at '%s'"),
+        COULD_NOT_READ_API("00006", "Could not read from Azure API", "Could not read from Azure API"),
+        COULD_NOT_CREATE_URL("00007", "Could not create endpoint URL", "Could not create endpoint URL"),
+        FAILED_TO_AUTHENTICATE_COMPUTEMANAGER("00008", "Failed to authenticate azure ComputeManager",
+                "Failed to authenticate azure ComputeManager");
+
+        private final String code;
+        private final String message;
+        private final String description;
+
+        ErrorMessage(String code, String message, String description) {
+
+            this.code = code;
+            this.message = message;
+            this.description = description;
+        }
+
+        public String getCode() {
+
+            return code;
+        }
+
+        public String getMessage() {
+
+            return message;
+        }
+
+        public String getDescription() {
+
+            return description;
+        }
+
+        public String toString() {
+
+            return getCode() + " | " + getMessage();
+        }
+    }
 }

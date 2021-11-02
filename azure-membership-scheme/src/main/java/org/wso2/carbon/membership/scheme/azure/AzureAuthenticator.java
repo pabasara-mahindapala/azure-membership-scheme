@@ -53,7 +53,7 @@ public class AzureAuthenticator {
                     .authority(authority)
                     .build();
         } catch (MalformedURLException e) {
-            throw new AzureMembershipSchemeException("Could not build ConfidentialClientApplication", e);
+            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_BUILD_CCA, null, e);
         }
 
         ClientCredentialParameters parameters =

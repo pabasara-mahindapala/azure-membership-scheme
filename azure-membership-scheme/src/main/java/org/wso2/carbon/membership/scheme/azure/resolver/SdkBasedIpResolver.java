@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.membership.scheme.azure.AzureAuthenticator;
 import org.wso2.carbon.membership.scheme.azure.Constants;
+import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.util.HashSet;
@@ -57,12 +58,12 @@ public class SdkBasedIpResolver extends AddressResolver {
             TokenCredential credential = AzureAuthenticator.getClientSecretCredential();
             computeManager = ComputeManager.authenticate(credential, profile);
         } catch (Exception e) {
-            throw new AzureMembershipSchemeException("Failed to authenticate azure ComputeManager", e);
+            throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_AUTHENTICATE_COMPUTEMANAGER, null, e);
         }
     }
 
     @Override
-    public Set<String> resolveAddresses() {
+    public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
         Iterable<VirtualMachine> virtualMachines =
                 computeManager.virtualMachines().listByResourceGroup(Constants.RESOURCE_GROUP_NAME);
@@ -81,6 +82,11 @@ public class SdkBasedIpResolver extends AddressResolver {
             }
         }
 
-        return ipAddresses;
+        if (!ipAddresses.isEmpty()) {
+            log.debug(String.format("Found %s IP addresses", ipAddresses.size()));
+            return ipAddresses;
+        } else {
+            throw Utils.handleException(Constants.ErrorMessage.NO_IPS_FOUND, null);
+        }
     }
 }

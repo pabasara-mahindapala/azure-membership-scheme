@@ -41,7 +41,6 @@ import org.wso2.carbon.membership.scheme.azure.resolver.SdkBasedIpResolver;
 import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.net.Inet4Address;
-import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.List;
@@ -128,8 +127,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
             Set<String> azureIPs = getAzureIpAddresses();
             // if no IPs are found, can't initialize clustering
             if (azureIPs.isEmpty()) {
-                throw new AzureMembershipSchemeException("No members found, unable to initialize the "
-                        + "Azure membership scheme");
+                throw Utils.handleException(Constants.ErrorMessage.NO_MEMBERS_FOUND, null);
             }
 
             for (String containerIP : azureIPs) {
