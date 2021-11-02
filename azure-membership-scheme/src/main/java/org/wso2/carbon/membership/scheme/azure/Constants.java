@@ -40,7 +40,7 @@ public class Constants {
     public static final String AZURE_API_ENDPOINT = "https://management.azure.com";
 
     /**
-     * EMAIL OTP service error codes.
+     * Azure membership scheme error codes.
      */
     public enum ErrorMessage {
 
