@@ -53,9 +53,11 @@ public class SdkBasedIpResolver extends AddressResolver {
 
     private void initialize() throws AzureMembershipSchemeException {
 
+        AzureAuthenticator azureAuthenticator = new AzureAuthenticator(getParameters());
+
         try {
-            AzureProfile profile = AzureAuthenticator.getAzureProfile();
-            TokenCredential credential = AzureAuthenticator.getClientSecretCredential();
+            AzureProfile profile = azureAuthenticator.getAzureProfile();
+            TokenCredential credential = azureAuthenticator.getClientSecretCredential();
             computeManager = ComputeManager.authenticate(credential, profile);
         } catch (Exception e) {
             throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_AUTHENTICATE_COMPUTEMANAGER, null, e);
@@ -66,7 +68,8 @@ public class SdkBasedIpResolver extends AddressResolver {
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
         Iterable<VirtualMachine> virtualMachines =
-                computeManager.virtualMachines().listByResourceGroup(Constants.RESOURCE_GROUP_NAME);
+                computeManager.virtualMachines()
+                        .listByResourceGroup(getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null));
         HashSet<String> ipAddresses = new HashSet<>();
 
         for (VirtualMachine virtualMachine : virtualMachines) {

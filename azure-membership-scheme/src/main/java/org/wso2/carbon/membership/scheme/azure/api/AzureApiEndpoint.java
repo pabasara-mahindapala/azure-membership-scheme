@@ -18,12 +18,14 @@
 
 package org.wso2.carbon.membership.scheme.azure.api;
 
+import org.apache.axis2.description.Parameter;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -32,6 +34,13 @@ import java.util.Scanner;
 public abstract class AzureApiEndpoint {
 
     HttpURLConnection connection;
+
+    private final Map<String, Parameter> parameters;
+
+    AzureApiEndpoint(final Map<String, Parameter> parameters) {
+
+        this.parameters = parameters;
+    }
 
     public abstract void createConnection() throws AzureMembershipSchemeException;
 
@@ -53,6 +62,11 @@ public abstract class AzureApiEndpoint {
         Scanner scanner = new Scanner(stream, "UTF-8");
         scanner.useDelimiter("\\Z");
         return scanner.next();
+    }
+
+    public Map<String, Parameter> getParameters() {
+
+        return parameters;
     }
 
 }

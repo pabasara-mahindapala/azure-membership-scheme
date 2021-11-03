@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.membership.scheme.azure.api;
 
+import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.membership.scheme.azure.AzureAuthenticator;
@@ -28,6 +29,7 @@ import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeE
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -39,6 +41,11 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
     private URL endpoint;
     private static final Log log = LogFactory.getLog(AzureHttpsApiEndpoint.class);
 
+    public AzureHttpsApiEndpoint(final Map<String, Parameter> parameters) {
+
+        super(parameters);
+    }
+
     @Override
     public void createConnection() throws AzureMembershipSchemeException {
 
@@ -49,7 +56,7 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
             throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, null, e);
         }
 
-        log.debug("Connecting to Azure API server...");
+        log.debug("Connecting to Azure API server");
         try {
             connection = (HttpsURLConnection) url.openConnection();
             this.endpoint = url;
@@ -63,7 +70,7 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
     @Override
     public void disconnect() {
 
-        log.debug("Disconnecting from Azure API server...");
+        log.debug("Disconnecting from Azure API server");
         if (connection != null) {
             connection.disconnect();
         }
@@ -72,14 +79,31 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
 
     private String getAccessToken() throws AzureMembershipSchemeException {
 
-        return AzureAuthenticator.acquireToken().accessToken();
+        AzureAuthenticator azureAuthenticator = new AzureAuthenticator(getParameters());
+        return azureAuthenticator.acquireToken().accessToken();
     }
 
-    private String urlForIpList() {
+    private String urlForIpList() throws AzureMembershipSchemeException {
 
         return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
-                        + "/publicIPAddresses?api-version=%s", Constants.AZURE_API_ENDPOINT, Constants.SUBSCRIPTION_ID,
-                Constants.RESOURCE_GROUP_NAME, Constants.API_VERSION);
+                        + "/publicIPAddresses?api-version=%s", Constants.AZURE_API_ENDPOINT,
+                getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null),
+                getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null),
+                getParameterValue(Constants.PARAMETER_NAME_API_VERSION, "2021-03-01"));
+    }
+
+    private String getParameterValue(String parameterName, String defaultValue)
+            throws AzureMembershipSchemeException {
+
+        Parameter azureServicesParam = getParameters().get(parameterName);
+        if (azureServicesParam == null) {
+            if (defaultValue == null) {
+                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
+            } else {
+                return defaultValue;
+            }
+        }
+        return (String) azureServicesParam.getValue();
     }
 
     public URL getEndpoint() {

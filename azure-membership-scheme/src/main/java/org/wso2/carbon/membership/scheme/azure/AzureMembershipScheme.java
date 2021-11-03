@@ -93,7 +93,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
      */
     private void initIpResolver() throws AzureMembershipSchemeException {
 
-        String useSDK = Constants.USE_SDK;
+        String useSDK = getParameterValue(Constants.PARAMETER_NAME_USE_SDK, "false");
 
         if (StringUtils.isEmpty(useSDK) || !Boolean.parseBoolean(useSDK)) {
             log.debug("Using API based ip resolving method");
@@ -118,7 +118,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     public void init() throws ClusteringFault {
 
         try {
-            log.info("Initializing azure membership scheme...");
+            log.info("Initializing azure membership scheme");
             nwConfig.getJoin().getMulticastConfig().setEnabled(false);
             nwConfig.getJoin().getAwsConfig().setEnabled(false);
             TcpIpConfig tcpIpConfig = nwConfig.getJoin().getTcpIpConfig();
@@ -148,6 +148,20 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     public void joinGroup() {
 
         primaryHazelcastInstance.getCluster().addMembershipListener(new AzureMembershipSchemeListener());
+    }
+
+    String getParameterValue(String parameterName, String defaultValue)
+            throws AzureMembershipSchemeException {
+
+        Parameter azureServicesParam = parameters.get(parameterName);
+        if (azureServicesParam == null) {
+            if (defaultValue == null) {
+                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
+            } else {
+                return defaultValue;
+            }
+        }
+        return (String) azureServicesParam.getValue();
     }
 
     /**

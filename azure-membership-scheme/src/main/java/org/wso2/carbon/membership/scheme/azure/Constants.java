@@ -26,18 +26,19 @@ import java.util.Set;
  */
 public class Constants {
 
-    public static final String RESOURCE_GROUP_NAME = "";
-    public static final String CLIENT_ID = "";
-    public static final String CLIENT_SECRET = "";
-    public static final String TENANT = "";
-    public static final String SUBSCRIPTION_ID = "";
     public static final String INSTANCE = "https://login.microsoftonline.com/%s/";
     public static final Set<String> MANAGEMENT_DEFAULT_SCOPE =
             Collections.singleton("https://management.azure.com/.default");
-    public static final String USE_SDK = "";
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String API_VERSION = "2021-03-01";
     public static final String AZURE_API_ENDPOINT = "https://management.azure.com";
+
+    public static final String PARAMETER_NAME_CLIENT_ID = "CLIENT_ID";
+    public static final String PARAMETER_NAME_CLIENT_SECRET = "CLIENT_SECRET";
+    public static final String PARAMETER_NAME_TENANT = "TENANT";
+    public static final String PARAMETER_NAME_SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
+    public static final String PARAMETER_NAME_RESOURCE_GROUP = "RESOURCE_GROUP";
+    public static final String PARAMETER_NAME_USE_SDK = "USE_SDK";
+    public static final String PARAMETER_NAME_API_VERSION = "API_VERSION";
 
     /**
      * Azure membership scheme error codes.

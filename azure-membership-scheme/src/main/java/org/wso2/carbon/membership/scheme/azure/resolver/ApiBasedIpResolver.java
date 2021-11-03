@@ -51,7 +51,7 @@ public class ApiBasedIpResolver extends AddressResolver {
     @Override
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
-        AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint();
+        AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint(getParameters());
 
         Set<String> publicIps;
 

@@ -27,9 +27,11 @@ import com.microsoft.aad.msal4j.ClientCredentialParameters;
 import com.microsoft.aad.msal4j.ConfidentialClientApplication;
 import com.microsoft.aad.msal4j.IAuthenticationResult;
 import com.microsoft.aad.msal4j.IClientCredential;
+import org.apache.axis2.description.Parameter;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.net.MalformedURLException;
+import java.util.Map;
 
 /**
  * Authenticate azure SDK and REST API.
@@ -39,17 +41,25 @@ import java.net.MalformedURLException;
  */
 public class AzureAuthenticator {
 
-    public static IAuthenticationResult acquireToken() throws AzureMembershipSchemeException {
+    private final Map<String, Parameter> parameters;
 
-        String authority = String.format(Constants.INSTANCE, Constants.TENANT);
+    public AzureAuthenticator(final Map<String, Parameter> parameters) {
 
-        IClientCredential credential = ClientCredentialFactory.createFromSecret(Constants.CLIENT_SECRET);
+        this.parameters = parameters;
+    }
+
+    public IAuthenticationResult acquireToken() throws AzureMembershipSchemeException {
+
+        String authority = String.format(Constants.INSTANCE, getParameterValue(Constants.PARAMETER_NAME_TENANT, null));
+
+        IClientCredential credential = ClientCredentialFactory.createFromSecret(
+                getParameterValue(Constants.PARAMETER_NAME_CLIENT_SECRET, null));
 
         ConfidentialClientApplication cca;
 
         try {
             cca = ConfidentialClientApplication
-                    .builder(Constants.CLIENT_ID, credential)
+                    .builder(getParameterValue(Constants.PARAMETER_NAME_CLIENT_ID, null), credential)
                     .authority(authority)
                     .build();
         } catch (MalformedURLException e) {
@@ -64,17 +74,32 @@ public class AzureAuthenticator {
         return cca.acquireToken(parameters).join();
     }
 
-    public static TokenCredential getClientSecretCredential() {
+    public TokenCredential getClientSecretCredential() throws AzureMembershipSchemeException {
 
         return new ClientSecretCredentialBuilder()
-                .clientId(Constants.CLIENT_ID)
-                .clientSecret(Constants.CLIENT_SECRET)
-                .tenantId(Constants.TENANT)
+                .clientId(getParameterValue(Constants.PARAMETER_NAME_CLIENT_ID, null))
+                .clientSecret(getParameterValue(Constants.PARAMETER_NAME_CLIENT_SECRET, null))
+                .tenantId(getParameterValue(Constants.PARAMETER_NAME_TENANT, null))
                 .build();
     }
 
-    public static AzureProfile getAzureProfile() {
+    public AzureProfile getAzureProfile() throws AzureMembershipSchemeException {
 
-        return new AzureProfile(Constants.TENANT, Constants.SUBSCRIPTION_ID, AzureEnvironment.AZURE);
+        return new AzureProfile(getParameterValue(Constants.PARAMETER_NAME_TENANT, null),
+                getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null), AzureEnvironment.AZURE);
+    }
+
+    String getParameterValue(String parameterName, String defaultValue)
+            throws AzureMembershipSchemeException {
+
+        Parameter azureServicesParam = parameters.get(parameterName);
+        if (azureServicesParam == null) {
+            if (defaultValue == null) {
+                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
+            } else {
+                return defaultValue;
+            }
+        }
+        return (String) azureServicesParam.getValue();
     }
 }

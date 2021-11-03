@@ -46,7 +46,7 @@ public abstract class AddressResolver {
      */
     public abstract Set<String> resolveAddresses() throws AzureMembershipSchemeException;
 
-    public String getParameterValue(String parameterName, String defaultValue)
+    String getParameterValue(String parameterName, String defaultValue)
             throws AzureMembershipSchemeException {
 
         Parameter azureServicesParam = parameters.get(parameterName);
