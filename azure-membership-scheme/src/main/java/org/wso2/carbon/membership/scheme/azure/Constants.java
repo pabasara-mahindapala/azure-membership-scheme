@@ -30,7 +30,6 @@ public class Constants {
     public static final Set<String> MANAGEMENT_DEFAULT_SCOPE =
             Collections.singleton("https://management.azure.com/.default");
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String AZURE_API_ENDPOINT = "https://management.azure.com";
 
     public static final String PARAMETER_NAME_CLIENT_ID = "CLIENT_ID";
     public static final String PARAMETER_NAME_CLIENT_SECRET = "CLIENT_SECRET";
@@ -39,6 +38,7 @@ public class Constants {
     public static final String PARAMETER_NAME_RESOURCE_GROUP = "RESOURCE_GROUP";
     public static final String PARAMETER_NAME_USE_SDK = "USE_SDK";
     public static final String PARAMETER_NAME_API_VERSION = "API_VERSION";
+    public static final String PARAMETER_NAME_API_ENDPOINT = "API_ENDPOINT";
 
     /**
      * Azure membership scheme error codes.

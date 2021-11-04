@@ -88,7 +88,8 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
     private String urlForIpList() throws AzureMembershipSchemeException {
 
         return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
-                        + "/publicIPAddresses?api-version=%s", Constants.AZURE_API_ENDPOINT,
+                        + "/publicIPAddresses?api-version=%s",
+                getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, "https://management.azure.com"),
                 getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null),
                 getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null),
                 getParameterValue(Constants.PARAMETER_NAME_API_VERSION, "2021-03-01"));
