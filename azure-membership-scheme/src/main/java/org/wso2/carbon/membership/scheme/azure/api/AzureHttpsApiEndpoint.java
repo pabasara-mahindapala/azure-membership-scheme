@@ -21,6 +21,7 @@ package org.wso2.carbon.membership.scheme.azure.api;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.graalvm.compiler.core.common.SuppressFBWarnings;
 import org.wso2.carbon.membership.scheme.azure.AzureAuthenticator;
 import org.wso2.carbon.membership.scheme.azure.Constants;
 import org.wso2.carbon.membership.scheme.azure.Utils;
@@ -47,6 +48,7 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
     }
 
     @Override
+    @SuppressFBWarnings(value = "URLCONNECTION_SSRF_FD", justification = "URL is built with constants.")
     public void createConnection() throws AzureMembershipSchemeException {
 
         URL url;
