@@ -31,14 +31,14 @@ public class Constants {
             Collections.singleton("https://management.azure.com/.default");
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
-    public static final String PARAMETER_NAME_CLIENT_ID = "CLIENT_ID";
-    public static final String PARAMETER_NAME_CLIENT_SECRET = "CLIENT_SECRET";
-    public static final String PARAMETER_NAME_TENANT = "TENANT";
-    public static final String PARAMETER_NAME_SUBSCRIPTION_ID = "SUBSCRIPTION_ID";
-    public static final String PARAMETER_NAME_RESOURCE_GROUP = "RESOURCE_GROUP";
+    public static final String PARAMETER_NAME_CLIENT_ID = "AZURE_CLIENT_ID";
+    public static final String PARAMETER_NAME_CLIENT_SECRET = "AZURE_CLIENT_SECRET";
+    public static final String PARAMETER_NAME_TENANT = "AZURE_TENANT";
+    public static final String PARAMETER_NAME_SUBSCRIPTION_ID = "AZURE_SUBSCRIPTION_ID";
+    public static final String PARAMETER_NAME_RESOURCE_GROUP = "AZURE_RESOURCE_GROUP";
     public static final String PARAMETER_NAME_USE_SDK = "USE_SDK";
-    public static final String PARAMETER_NAME_API_VERSION = "API_VERSION";
-    public static final String PARAMETER_NAME_API_ENDPOINT = "API_ENDPOINT";
+    public static final String PARAMETER_NAME_API_VERSION = "AZURE_API_VERSION";
+    public static final String PARAMETER_NAME_API_ENDPOINT = "AZURE_API_ENDPOINT";
 
     /**
      * Azure membership scheme error codes.
