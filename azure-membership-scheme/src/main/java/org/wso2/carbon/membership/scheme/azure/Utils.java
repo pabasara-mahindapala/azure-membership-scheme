@@ -34,7 +34,7 @@ public class Utils {
         } else {
             description = errorMessage.getDescription();
         }
-        return new AzureMembershipSchemeException(errorMessage.getCode(), errorMessage.getMessage(), description);
+        return new AzureMembershipSchemeException(errorMessage.getMessage(), description);
     }
 
     public static AzureMembershipSchemeException handleException(Constants.ErrorMessage errorMessage, String data,
@@ -46,8 +46,7 @@ public class Utils {
         } else {
             description = errorMessage.getDescription();
         }
-        return new AzureMembershipSchemeException(errorMessage.getCode(), errorMessage.getMessage(), cause,
-                description);
+        return new AzureMembershipSchemeException(errorMessage.getMessage(), description, cause);
     }
 
 }

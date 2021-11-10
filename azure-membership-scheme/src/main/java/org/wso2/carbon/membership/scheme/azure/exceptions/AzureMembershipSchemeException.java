@@ -23,43 +23,28 @@ package org.wso2.carbon.membership.scheme.azure.exceptions;
  */
 public class AzureMembershipSchemeException extends Exception {
 
-    private String errorCode;
     private String description;
 
-    public AzureMembershipSchemeException(String errorCode, String message) {
+    public AzureMembershipSchemeException(String message) {
 
         super(message);
-        this.errorCode = errorCode;
     }
 
-    public AzureMembershipSchemeException(String errorCode, String message, Throwable cause) {
+    public AzureMembershipSchemeException(String message, Throwable cause) {
 
         super(message, cause);
-        this.errorCode = errorCode;
     }
 
-    public AzureMembershipSchemeException(String errorCode, String message, String description) {
+    public AzureMembershipSchemeException(String message, String description) {
 
         super(message);
-        this.errorCode = errorCode;
         this.description = description;
     }
 
-    public AzureMembershipSchemeException(String errorCode, String message, Throwable cause, String description) {
+    public AzureMembershipSchemeException(String message, String description, Throwable cause) {
 
         super(message, cause);
-        this.errorCode = errorCode;
         this.description = description;
-    }
-
-    public String getErrorCode() {
-
-        return errorCode;
-    }
-
-    public void setErrorCode(String errorCode) {
-
-        this.errorCode = errorCode;
     }
 
     public String getDescription() {

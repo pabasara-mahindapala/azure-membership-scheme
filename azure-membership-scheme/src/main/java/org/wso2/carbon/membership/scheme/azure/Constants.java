@@ -45,35 +45,25 @@ public class Constants {
      */
     public enum ErrorMessage {
 
-        // Client error codes.
-        COULD_NOT_BUILD_CCA("60001", "Could not build ConfidentialClientApplication.",
+        COULD_NOT_BUILD_CCA("Could not build ConfidentialClientApplication.",
                 "Could not build ConfidentialClientApplication."),
-        FAILED_TO_CONNECT("60002", "Failed to open connection.", "Failed to open connection."),
-        NO_MEMBERS_FOUND("60003", "No members found.",
+        FAILED_TO_CONNECT("Failed to open connection.", "Failed to open connection."),
+        NO_MEMBERS_FOUND("No members found.",
                 "No members found, unable to initialize the Azure membership scheme."),
-        PARAMETER_NOT_FOUND("60004", "Parameter not found.", "'%s' parameter not found."),
-        NO_IPS_FOUND("60005", "No IPs found", "No IPs found at '%s'"),
-        COULD_NOT_CREATE_URL("60006", "Could not create endpoint URL", "Could not create endpoint URL"),
-
-        // Server error codes.
-        COULD_NOT_READ_API("65001", "Could not read from Azure API", "Could not read from Azure API"),
-        FAILED_TO_AUTHENTICATE_COMPUTEMANAGER("65002", "Failed to authenticate azure ComputeManager",
+        PARAMETER_NOT_FOUND("Parameter not found.", "'%s' parameter not found."),
+        NO_IPS_FOUND("No IPs found", "No IPs found at '%s'"),
+        COULD_NOT_CREATE_URL("Could not create endpoint URL", "Could not create endpoint URL"),
+        COULD_NOT_READ_API("Could not read from Azure API", "Could not read from Azure API"),
+        FAILED_TO_AUTHENTICATE_COMPUTEMANAGER("Failed to authenticate azure ComputeManager",
                 "Failed to authenticate azure ComputeManager");
 
-        private final String code;
         private final String message;
         private final String description;
 
-        ErrorMessage(String code, String message, String description) {
+        ErrorMessage(String message, String description) {
 
-            this.code = code;
             this.message = message;
             this.description = description;
-        }
-
-        public String getCode() {
-
-            return code;
         }
 
         public String getMessage() {
@@ -84,11 +74,6 @@ public class Constants {
         public String getDescription() {
 
             return description;
-        }
-
-        public String toString() {
-
-            return getCode() + " | " + getMessage();
         }
     }
 }
