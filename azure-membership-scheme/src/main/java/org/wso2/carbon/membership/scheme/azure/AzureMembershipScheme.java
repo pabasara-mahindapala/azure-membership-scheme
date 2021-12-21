@@ -61,7 +61,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     private HazelcastCarbonClusterImpl carbonCluster;
     private AddressResolver ipResolver;
 
-    public AzureMembershipScheme(Map<String, Parameter> parameters, Config config,
+    public AzureMembershipScheme(Map<String, Parameter> parameters, String primaryDomain, Config config,
                                  HazelcastInstance primaryHazelcastInstance, List<ClusteringMessage> messageBuffer) {
 
         this.parameters = parameters;

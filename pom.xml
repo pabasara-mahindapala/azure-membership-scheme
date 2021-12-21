@@ -283,6 +283,11 @@
                 <artifactId>dnsjava</artifactId>
                 <version>${dnsjava.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.azure</groupId>
+                <artifactId>azure-core-http-netty</artifactId>
+                <version>${azure.core.http.netty.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -303,5 +308,6 @@
         <ppaas.version>4.1.5</ppaas.version>
         <project.scm.id>my-scm-server</project.scm.id>
         <testng.version>6.9.9</testng.version>
+        <azure.core.http.netty.version>1.11.4.wso2v1</azure.core.http.netty.version>
     </properties>
 </project>

@@ -34,8 +34,10 @@ import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class responsible for resolving ips based on Azure SDK.
@@ -67,9 +69,11 @@ public class SdkBasedIpResolver extends AddressResolver {
     @Override
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
-        Iterable<VirtualMachine> virtualMachines =
-                computeManager.virtualMachines()
-                        .listByResourceGroup(getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null));
+        List<VirtualMachine> virtualMachines = computeManager.virtualMachines()
+                .listByResourceGroup(getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null))
+                .stream()
+                .collect(Collectors.toList());
+
         HashSet<String> ipAddresses = new HashSet<>();
 
         for (VirtualMachine virtualMachine : virtualMachines) {
