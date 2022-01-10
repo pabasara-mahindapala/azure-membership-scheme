@@ -33,8 +33,8 @@
 
     <properties>
         <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
-        <azure.resourcemanager.compute.version>2.10.0</azure.resourcemanager.compute.version>
-        <azure-identity.version>1.4.2</azure-identity.version>
+        <azure.resourcemanager.version>2.10.0</azure.resourcemanager.version>
+        <azure.identity.version>1.4.2</azure.identity.version>
         <azure.core.http.okhttp.version>1.7.6</azure.core.http.okhttp.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.sourceEncoding>UTF-8</project.reporting.sourceEncoding>
@@ -62,48 +62,74 @@
             <artifactId>commons-logging</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>dnsjava</groupId>
-            <artifactId>dnsjava</artifactId>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--            <artifactId>jackson-core</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--            <artifactId>jackson-databind</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--            <artifactId>jackson-annotations</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>dnsjava</groupId>-->
+<!--            <artifactId>dnsjava</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-netty</artifactId>
-            <scope>provided</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.mock-server</groupId>-->
+<!--            <artifactId>mockserver-netty</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.azure.resourcemanager</groupId>-->
+<!--            <artifactId>azure-resourcemanager-compute</artifactId>-->
+<!--            <version>${azure.resourcemanager.compute.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.azure.resourcemanager</groupId>
-            <artifactId>azure-resourcemanager-compute</artifactId>
-            <version>${azure.resourcemanager.compute.version}</version>
+            <artifactId>azure-resourcemanager</artifactId>
+            <version>${azure.resourcemanager.version}</version>
         </dependency>
         <dependency>
             <groupId>com.azure</groupId>
-            <artifactId>azure-identity</artifactId>
-            <version>${azure-identity.version}</version>
+            <artifactId>azure-core-http-okhttp</artifactId>
+            <version>${azure.core.http.okhttp.version}</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.azure</groupId>-->
+<!--            <artifactId>azure-core</artifactId>-->
+<!--            <version>1.23.1</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>org.wso2.orbit.com.azure</groupId>
-            <artifactId>azure-core-http-netty</artifactId>
-            <scope>provided</scope>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-identity</artifactId>
+            <version>${azure.identity.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.azure</groupId>
+                    <artifactId>azure-core-http-netty</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.azure</groupId>-->
+<!--            <artifactId>azure-core</artifactId>-->
+<!--            <version>1.22.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.wso2.orbit.com.azure</groupId>-->
+<!--            <artifactId>azure-core-http-netty</artifactId>-->
+<!--            <version>1.11.2.wso2v1</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -125,7 +151,7 @@
                             org.wso2.carbon.membership.scheme.azure.*,
                         </Export-Package>
                         <Import-Package>
-                            !org.apache.commons.logging,
+                            com.azure.core.http.netty.*; version=[1.0.0,2.0.0],
                             org.apache.commons.logging; version=0.0.0,
                             org.xbill.DNS.*; version=0.0.0,
                             *;resolution:=optional
@@ -181,6 +207,38 @@
                     <source>8</source>
                     <target>8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.reficio</groupId>
+                <artifactId>p2-maven-plugin</artifactId>
+                <version>1.7.0</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <configuration>
+                            <artifacts>
+                                <dependency>
+                                    <id>com.azure:azure-core:1.22.0</id>
+                                    <source>true</source>
+                                    <transitive>false</transitive>
+                                    <instructions>
+                                        <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
+                                            osgi.serviceloader; filter:="(osgi.serviceloader=com.azure.core.http.HttpClientProvider)"; cardinality:=multiple</Require-Capability>
+                                    </instructions>
+                                </dependency>
+                                <dependency>
+                                    <id>com.azure:azure-core-http-okhttp:1.7.6</id>
+                                    <source>true</source>
+                                    <transitive>true</transitive>
+                                    <instructions>
+                                        <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+                                        <Provide-Capability>osgi.serviceloader; osgi.serviceloader=com.azure.core.http.HttpClientProvider</Provide-Capability>
+                                    </instructions>
+                                </dependency>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

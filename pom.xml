@@ -253,41 +253,43 @@
                 <artifactId>commons-logging</artifactId>
                 <version>${commons.logging.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--                <artifactId>jackson-core</artifactId>-->
+<!--                <version>${jackson.version}</version>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--                <artifactId>jackson-databind</artifactId>-->
+<!--                <version>${jackson.version}</version>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--                <artifactId>jackson-annotations</artifactId>-->
+<!--                <version>${jackson.version}</version>-->
+<!--            </dependency>-->
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.mock-server</groupId>
-                <artifactId>mockserver-netty</artifactId>
-                <version>${mockserver.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>dnsjava</groupId>
-                <artifactId>dnsjava</artifactId>
-                <version>${dnsjava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.com.azure</groupId>
-                <artifactId>azure-core-http-netty</artifactId>
-                <version>${azure.core.http.netty.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.mock-server</groupId>-->
+<!--                <artifactId>mockserver-netty</artifactId>-->
+<!--                <version>${mockserver.version}</version>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>dnsjava</groupId>-->
+<!--                <artifactId>dnsjava</artifactId>-->
+<!--                <version>${dnsjava.version}</version>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>com.azure</groupId>-->
+<!--                <artifactId>azure-sdk-bom</artifactId>-->
+<!--                <version>1.0.5</version>-->
+<!--                <type>pom</type>-->
+<!--                <scope>import</scope>-->
+<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 
@@ -308,6 +310,5 @@
         <ppaas.version>4.1.5</ppaas.version>
         <project.scm.id>my-scm-server</project.scm.id>
         <testng.version>6.9.9</testng.version>
-        <azure.core.http.netty.version>1.11.4.wso2v1</azure.core.http.netty.version>
     </properties>
 </project>

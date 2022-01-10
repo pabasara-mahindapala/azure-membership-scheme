@@ -42,3 +42,4 @@ mockserver*.log
 
 *.DS_Store
 /azure-membership-scheme/target/
+/true/
