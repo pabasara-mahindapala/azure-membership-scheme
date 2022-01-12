@@ -93,7 +93,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
      */
     private void initIpResolver() throws AzureMembershipSchemeException {
 
-        String useSDK = getParameterValue(Constants.PARAMETER_NAME_USE_SDK, "false");
+        String useSDK = Utils.getParameterValue(Constants.PARAMETER_NAME_USE_SDK, "false", parameters);
 
         if (StringUtils.isEmpty(useSDK) || !Boolean.parseBoolean(useSDK)) {
             log.debug("Using API based ip resolving method");
@@ -148,20 +148,6 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
     public void joinGroup() {
 
         primaryHazelcastInstance.getCluster().addMembershipListener(new AzureMembershipSchemeListener());
-    }
-
-    String getParameterValue(String parameterName, String defaultValue)
-            throws AzureMembershipSchemeException {
-
-        Parameter azureServicesParam = parameters.get(parameterName);
-        if (azureServicesParam == null) {
-            if (defaultValue == null) {
-                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
-            } else {
-                return defaultValue;
-            }
-        }
-        return (String) azureServicesParam.getValue();
     }
 
     /**

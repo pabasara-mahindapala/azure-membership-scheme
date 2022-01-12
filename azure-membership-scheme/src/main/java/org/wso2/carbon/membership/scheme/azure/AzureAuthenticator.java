@@ -50,16 +50,17 @@ public class AzureAuthenticator {
 
     public IAuthenticationResult acquireToken() throws AzureMembershipSchemeException {
 
-        String authority = String.format(Constants.INSTANCE, getParameterValue(Constants.PARAMETER_NAME_TENANT, null));
+        String authority = String.format(Constants.INSTANCE,
+                Utils.getParameterValue(Constants.PARAMETER_NAME_TENANT, null, parameters));
 
         IClientCredential credential = ClientCredentialFactory.createFromSecret(
-                getParameterValue(Constants.PARAMETER_NAME_CLIENT_SECRET, null));
+                Utils.getParameterValue(Constants.PARAMETER_NAME_CLIENT_SECRET, null, parameters));
 
         ConfidentialClientApplication cca;
 
         try {
             cca = ConfidentialClientApplication
-                    .builder(getParameterValue(Constants.PARAMETER_NAME_CLIENT_ID, null), credential)
+                    .builder(Utils.getParameterValue(Constants.PARAMETER_NAME_CLIENT_ID, null, parameters), credential)
                     .authority(authority)
                     .build();
         } catch (MalformedURLException e) {
@@ -77,29 +78,16 @@ public class AzureAuthenticator {
     public TokenCredential getClientSecretCredential() throws AzureMembershipSchemeException {
 
         return new ClientSecretCredentialBuilder()
-                .clientId(getParameterValue(Constants.PARAMETER_NAME_CLIENT_ID, null))
-                .clientSecret(getParameterValue(Constants.PARAMETER_NAME_CLIENT_SECRET, null))
-                .tenantId(getParameterValue(Constants.PARAMETER_NAME_TENANT, null))
+                .clientId(Utils.getParameterValue(Constants.PARAMETER_NAME_CLIENT_ID, null, parameters))
+                .clientSecret(Utils.getParameterValue(Constants.PARAMETER_NAME_CLIENT_SECRET, null, parameters))
+                .tenantId(Utils.getParameterValue(Constants.PARAMETER_NAME_TENANT, null, parameters))
                 .build();
     }
 
     public AzureProfile getAzureProfile() throws AzureMembershipSchemeException {
 
-        return new AzureProfile(getParameterValue(Constants.PARAMETER_NAME_TENANT, null),
-                getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null), AzureEnvironment.AZURE);
-    }
-
-    String getParameterValue(String parameterName, String defaultValue)
-            throws AzureMembershipSchemeException {
-
-        Parameter azureServicesParam = parameters.get(parameterName);
-        if (azureServicesParam == null) {
-            if (defaultValue == null) {
-                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
-            } else {
-                return defaultValue;
-            }
-        }
-        return (String) azureServicesParam.getValue();
+        return new AzureProfile(Utils.getParameterValue(Constants.PARAMETER_NAME_TENANT, null, parameters),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null, parameters),
+                AzureEnvironment.AZURE);
     }
 }

@@ -30,6 +30,8 @@ public class Constants {
     public static final Set<String> MANAGEMENT_DEFAULT_SCOPE =
             Collections.singleton("https://management.azure.com/.default");
     public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String DEFAULT_API_ENDPOINT = "https://management.azure.com";
+    public static final String DEFAULT_API_VERSION = "2021-03-01";
 
     public static final String PARAMETER_NAME_CLIENT_ID = "AZURE_CLIENT_ID";
     public static final String PARAMETER_NAME_CLIENT_SECRET = "AZURE_CLIENT_SECRET";

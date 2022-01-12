@@ -89,24 +89,12 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
 
         return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
                         + "/publicIPAddresses?api-version=%s",
-                getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, "https://management.azure.com"),
-                getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null),
-                getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null),
-                getParameterValue(Constants.PARAMETER_NAME_API_VERSION, "2021-03-01"));
-    }
-
-    private String getParameterValue(String parameterName, String defaultValue)
-            throws AzureMembershipSchemeException {
-
-        Parameter azureServicesParam = getParameters().get(parameterName);
-        if (azureServicesParam == null) {
-            if (defaultValue == null) {
-                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
-            } else {
-                return defaultValue;
-            }
-        }
-        return (String) azureServicesParam.getValue();
+                Utils.getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
+                        getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
+                        getParameters()));
     }
 
     public URL getEndpoint() {

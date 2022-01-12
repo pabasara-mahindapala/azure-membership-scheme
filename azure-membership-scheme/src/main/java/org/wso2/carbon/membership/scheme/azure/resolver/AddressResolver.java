@@ -19,8 +19,6 @@
 package org.wso2.carbon.membership.scheme.azure.resolver;
 
 import org.apache.axis2.description.Parameter;
-import org.wso2.carbon.membership.scheme.azure.Constants;
-import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.util.Map;
@@ -45,20 +43,6 @@ public abstract class AddressResolver {
      * @throws AzureMembershipSchemeException if an error occurred while resolving the addresses
      */
     public abstract Set<String> resolveAddresses() throws AzureMembershipSchemeException;
-
-    String getParameterValue(String parameterName, String defaultValue)
-            throws AzureMembershipSchemeException {
-
-        Parameter azureServicesParam = parameters.get(parameterName);
-        if (azureServicesParam == null) {
-            if (defaultValue == null) {
-                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
-            } else {
-                return defaultValue;
-            }
-        }
-        return (String) azureServicesParam.getValue();
-    }
 
     public Map<String, Parameter> getParameters() {
 

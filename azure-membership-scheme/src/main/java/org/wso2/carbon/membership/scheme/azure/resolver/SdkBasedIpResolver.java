@@ -65,9 +65,11 @@ public class SdkBasedIpResolver extends AddressResolver {
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
         Set<String> ipAddresses = networkManager.publicIpAddresses()
-                .listByResourceGroup(getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null))
+                .listByResourceGroup(
+                        Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()))
                 .stream()
                 .map(PublicIpAddress::ipAddress)
+                .filter(Utils::isNotNullOrEmptyAfterTrim)
                 .collect(Collectors.toSet());
 
         if (!ipAddresses.isEmpty()) {

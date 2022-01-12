@@ -19,8 +19,6 @@
 package org.wso2.carbon.membership.scheme.azure.resolver;
 
 import com.hazelcast.internal.json.Json;
-import com.hazelcast.internal.json.JsonArray;
-import com.hazelcast.internal.json.JsonObject;
 import com.hazelcast.internal.json.JsonValue;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
@@ -84,36 +82,13 @@ public class ApiBasedIpResolver extends AddressResolver {
 
         HashSet<String> ipAddresses = new HashSet<>();
 
-        for (JsonValue item : toJsonArray(Json.parse(response).asObject().get("value"))) {
-            String ip = toJsonObject(item.asObject().get("properties")).getString("ipAddress", null);
-            if (!isNullOrEmptyAfterTrim(ip)) {
+        for (JsonValue item : Utils.toJsonArray(Json.parse(response).asObject().get("value"))) {
+            String ip = Utils.toJsonObject(item.asObject().get("properties")).getString("ipAddress", null);
+            if (Utils.isNotNullOrEmptyAfterTrim(ip)) {
                 ipAddresses.add(ip);
             }
         }
 
         return ipAddresses;
-    }
-
-    private JsonArray toJsonArray(JsonValue jsonValue) {
-
-        if (jsonValue == null || jsonValue.isNull()) {
-            return new JsonArray();
-        } else {
-            return jsonValue.asArray();
-        }
-    }
-
-    private JsonObject toJsonObject(JsonValue jsonValue) {
-
-        if (jsonValue == null || jsonValue.isNull()) {
-            return new JsonObject();
-        } else {
-            return jsonValue.asObject();
-        }
-    }
-
-    private boolean isNullOrEmptyAfterTrim(String s) {
-
-        return s == null || s.trim().isEmpty();
     }
 }

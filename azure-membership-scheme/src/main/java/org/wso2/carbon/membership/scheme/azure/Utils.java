@@ -18,8 +18,14 @@
 
 package org.wso2.carbon.membership.scheme.azure;
 
+import com.hazelcast.internal.json.JsonArray;
+import com.hazelcast.internal.json.JsonObject;
+import com.hazelcast.internal.json.JsonValue;
+import org.apache.axis2.description.Parameter;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
+
+import java.util.Map;
 
 /**
  * Util functions for azure membership scheme.
@@ -47,6 +53,44 @@ public class Utils {
             description = errorMessage.getDescription();
         }
         return new AzureMembershipSchemeException(errorMessage.getMessage(), description, cause);
+    }
+
+    public static String getParameterValue(String parameterName, String defaultValue,
+                                           Map<String, Parameter> parameters)
+            throws AzureMembershipSchemeException {
+
+        Parameter azureServicesParam = parameters.get(parameterName);
+        if (azureServicesParam == null) {
+            if (defaultValue == null) {
+                throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
+            } else {
+                return defaultValue;
+            }
+        }
+        return (String) azureServicesParam.getValue();
+    }
+
+    public static boolean isNotNullOrEmptyAfterTrim(String s) {
+
+        return s != null && !s.trim().isEmpty();
+    }
+
+    public static JsonArray toJsonArray(JsonValue jsonValue) {
+
+        if (jsonValue == null || jsonValue.isNull()) {
+            return new JsonArray();
+        } else {
+            return jsonValue.asArray();
+        }
+    }
+
+    public static JsonObject toJsonObject(JsonValue jsonValue) {
+
+        if (jsonValue == null || jsonValue.isNull()) {
+            return new JsonObject();
+        } else {
+            return jsonValue.asObject();
+        }
     }
 
 }
