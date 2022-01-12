@@ -130,10 +130,10 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
                 throw Utils.handleException(Constants.ErrorMessage.NO_MEMBERS_FOUND, null);
             }
 
-            for (String containerIP : azureIPs) {
-                if (!containerIP.equals(Inet4Address.getLocalHost().getHostAddress())) {
-                    tcpIpConfig.addMember(containerIP);
-                    log.info("Member added to cluster configuration: [container-ip] " + containerIP);
+            for (String azureIP : azureIPs) {
+                if (!azureIP.equals(Inet4Address.getLocalHost().getHostAddress())) {
+                    tcpIpConfig.addMember(azureIP);
+                    log.info("Member added to cluster configuration: [vm-ip] " + azureIP);
                 }
             }
             log.info("Azure membership scheme initialized successfully");

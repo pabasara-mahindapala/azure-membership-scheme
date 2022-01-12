@@ -20,11 +20,8 @@ package org.wso2.carbon.membership.scheme.azure.resolver;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.compute.ComputeManager;
-import com.azure.resourcemanager.compute.models.PowerState;
-import com.azure.resourcemanager.compute.models.VirtualMachine;
-import com.azure.resourcemanager.network.models.NetworkInterface;
-import com.azure.resourcemanager.network.models.NicIpConfiguration;
+import com.azure.resourcemanager.network.NetworkManager;
+import com.azure.resourcemanager.network.models.PublicIpAddress;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,8 +30,6 @@ import org.wso2.carbon.membership.scheme.azure.Constants;
 import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,7 +40,7 @@ import java.util.stream.Collectors;
 public class SdkBasedIpResolver extends AddressResolver {
 
     private static final Log log = LogFactory.getLog(SdkBasedIpResolver.class);
-    private ComputeManager computeManager;
+    private NetworkManager networkManager;
 
     public SdkBasedIpResolver(final Map<String, Parameter> parameters) throws AzureMembershipSchemeException {
 
@@ -60,7 +55,7 @@ public class SdkBasedIpResolver extends AddressResolver {
         try {
             AzureProfile profile = azureAuthenticator.getAzureProfile();
             TokenCredential credential = azureAuthenticator.getClientSecretCredential();
-            computeManager = ComputeManager.authenticate(credential, profile);
+            networkManager = NetworkManager.authenticate(credential, profile);
         } catch (Exception e) {
             throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_AUTHENTICATE_COMPUTEMANAGER, null, e);
         }
@@ -69,25 +64,11 @@ public class SdkBasedIpResolver extends AddressResolver {
     @Override
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
-        List<VirtualMachine> virtualMachines = computeManager.virtualMachines()
+        Set<String> ipAddresses = networkManager.publicIpAddresses()
                 .listByResourceGroup(getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null))
                 .stream()
-                .collect(Collectors.toList());
-
-        HashSet<String> ipAddresses = new HashSet<>();
-
-        for (VirtualMachine virtualMachine : virtualMachines) {
-            // skip any deallocated vms
-            if (!PowerState.RUNNING.equals(virtualMachine.powerState())) {
-                continue;
-            }
-
-            NetworkInterface networkInterface = virtualMachine.getPrimaryNetworkInterface();
-            for (NicIpConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
-                String publicIP = ipConfiguration.getPublicIpAddress().ipAddress();
-                ipAddresses.add(publicIP);
-            }
-        }
+                .map(PublicIpAddress::ipAddress)
+                .collect(Collectors.toSet());
 
         if (!ipAddresses.isEmpty()) {
             log.debug(String.format("Found %s IP addresses", ipAddresses.size()));
