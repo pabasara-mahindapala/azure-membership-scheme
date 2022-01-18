@@ -41,9 +41,10 @@ public class Constants {
     public static final String PARAMETER_NAME_USE_SDK = "USE_SDK";
     public static final String PARAMETER_NAME_API_VERSION = "AZURE_API_VERSION";
     public static final String PARAMETER_NAME_API_ENDPOINT = "AZURE_API_ENDPOINT";
+    public static final String PARAMETER_NAME_USE_PUBLIC_IP_ADDRESSES = "USE_PUBLIC_IP_ADDRESSES";
 
     /**
-     * Azure membership scheme error codes.
+     * Azure membership scheme error messages.
      */
     public enum ErrorMessage {
 

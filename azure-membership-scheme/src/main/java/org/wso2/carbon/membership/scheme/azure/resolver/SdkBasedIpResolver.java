@@ -21,6 +21,7 @@ package org.wso2.carbon.membership.scheme.azure.resolver;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.network.NetworkManager;
+import com.azure.resourcemanager.network.models.NetworkInterfaceBase;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
@@ -29,6 +30,7 @@ import org.wso2.carbon.membership.scheme.azure.AzureAuthenticator;
 import org.wso2.carbon.membership.scheme.azure.Constants;
 import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
+import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -64,13 +66,30 @@ public class SdkBasedIpResolver extends AddressResolver {
     @Override
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
-        Set<String> ipAddresses = networkManager.publicIpAddresses()
-                .listByResourceGroup(
-                        Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()))
-                .stream()
-                .map(PublicIpAddress::ipAddress)
-                .filter(Utils::isNotNullOrEmptyAfterTrim)
-                .collect(Collectors.toSet());
+        Set<String> ipAddresses;
+
+        String usePublicIPAddresses =
+                Utils.getParameterValue(Constants.PARAMETER_NAME_USE_PUBLIC_IP_ADDRESSES, "false", getParameters());
+
+        if (StringUtils.isEmpty(usePublicIPAddresses) || !Boolean.parseBoolean(usePublicIPAddresses)) {
+            log.debug("Using private IP addresses");
+
+            ipAddresses = networkManager.networkInterfaces().listByResourceGroup(
+                            Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()))
+                    .stream()
+                    .map(NetworkInterfaceBase::primaryPrivateIP)
+                    .filter(Utils::isNotNullOrEmptyAfterTrim)
+                    .collect(Collectors.toSet());
+        } else {
+            log.debug("Using public IP addresses");
+
+            ipAddresses = networkManager.publicIpAddresses().listByResourceGroup(
+                            Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()))
+                    .stream()
+                    .map(PublicIpAddress::ipAddress)
+                    .filter(Utils::isNotNullOrEmptyAfterTrim)
+                    .collect(Collectors.toSet());
+        }
 
         if (!ipAddresses.isEmpty()) {
             log.debug(String.format("Found %s IP addresses", ipAddresses.size()));
