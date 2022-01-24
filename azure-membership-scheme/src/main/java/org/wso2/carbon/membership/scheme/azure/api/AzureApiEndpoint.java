@@ -42,7 +42,7 @@ public abstract class AzureApiEndpoint {
         this.parameters = parameters;
     }
 
-    public abstract void createConnection() throws AzureMembershipSchemeException;
+    public abstract void createConnection(URL url) throws AzureMembershipSchemeException;
 
     public abstract void disconnect();
 

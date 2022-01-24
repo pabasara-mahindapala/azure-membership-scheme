@@ -19,6 +19,7 @@
 package org.wso2.carbon.membership.scheme.azure.resolver;
 
 import com.hazelcast.internal.json.Json;
+import com.hazelcast.internal.json.JsonObject;
 import com.hazelcast.internal.json.JsonValue;
 import org.apache.axis2.description.Parameter;
 import org.apache.commons.logging.Log;
@@ -28,8 +29,11 @@ import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.api.AzureApiEndpoint;
 import org.wso2.carbon.membership.scheme.azure.api.AzureHttpsApiEndpoint;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
+import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -49,33 +53,57 @@ public class ApiBasedIpResolver extends AddressResolver {
     @Override
     public Set<String> resolveAddresses() throws AzureMembershipSchemeException {
 
+        Set<String> ipAddresses;
         AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint(getParameters());
 
-        Set<String> publicIps;
+        String usePublicIPAddresses =
+                Utils.getParameterValue(Constants.PARAMETER_NAME_USE_PUBLIC_IP_ADDRESSES, "false", getParameters());
 
         try {
-            publicIps = parsePublicIpResponse(connectAndRead(apiEndpoint));
+            if (StringUtils.isEmpty(usePublicIPAddresses) || !Boolean.parseBoolean(usePublicIPAddresses)) {
+                log.debug("Using private IP addresses");
+
+                ipAddresses = parsePrivateIpResponse(connectAndRead(apiEndpoint, urlForPrivateIpList()));
+            } else {
+                log.debug("Using public IP addresses");
+
+                ipAddresses = parsePublicIpResponse(connectAndRead(apiEndpoint, urlForPublicIpList()));
+            }
         } finally {
             apiEndpoint.disconnect();
         }
 
-        if (!publicIps.isEmpty()) {
-            log.debug(String.format("Found %s IP addresses", publicIps.size()));
-            return publicIps;
+        if (!ipAddresses.isEmpty()) {
+            log.debug(String.format("Found %s IP addresses", ipAddresses.size()));
+            return ipAddresses;
         } else {
             throw Utils.handleException(Constants.ErrorMessage.NO_IPS_FOUND, apiEndpoint.getEndpoint().toString());
         }
     }
 
-    private String connectAndRead(AzureApiEndpoint endpoint) throws AzureMembershipSchemeException {
-
-        endpoint.createConnection();
+    private String connectAndRead(AzureApiEndpoint endpoint, String urlForIpList)
+            throws AzureMembershipSchemeException {
 
         try {
+            endpoint.createConnection(new URL(urlForIpList));
             return endpoint.read();
+        } catch (MalformedURLException e) {
+            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, null, e);
         } catch (IOException e) {
             throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_READ_API, null, e);
         }
+    }
+
+    private String urlForPublicIpList() throws AzureMembershipSchemeException {
+
+        return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
+                        + "/publicIPAddresses?api-version=%s",
+                Utils.getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
+                        getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
+                        getParameters()));
     }
 
     private Set<String> parsePublicIpResponse(String response) {
@@ -83,9 +111,39 @@ public class ApiBasedIpResolver extends AddressResolver {
         HashSet<String> ipAddresses = new HashSet<>();
 
         for (JsonValue item : Utils.toJsonArray(Json.parse(response).asObject().get("value"))) {
-            String ip = Utils.toJsonObject(item.asObject().get("properties")).getString("ipAddress", null);
-            if (Utils.isNotNullOrEmptyAfterTrim(ip)) {
-                ipAddresses.add(ip);
+            String publicIp = Utils.toJsonObject(item.asObject().get("properties")).getString("ipAddress", null);
+            if (Utils.isNotNullOrEmptyAfterTrim(publicIp)) {
+                ipAddresses.add(publicIp);
+            }
+        }
+
+        return ipAddresses;
+    }
+
+    private String urlForPrivateIpList() throws AzureMembershipSchemeException {
+
+        return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
+                        + "/networkInterfaces?api-version=%s",
+                Utils.getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
+                        getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
+                        getParameters()));
+    }
+
+    private Set<String> parsePrivateIpResponse(String response) {
+
+        HashSet<String> ipAddresses = new HashSet<>();
+
+        for (JsonValue item : Utils.toJsonArray(Json.parse(response).asObject().get("value"))) {
+            JsonObject properties = item.asObject().get("properties").asObject();
+            if (properties.get("virtualMachine") != null) {
+                for (JsonValue ipConfiguration : Utils.toJsonArray(properties.get("ipConfigurations"))) {
+                    JsonObject ipProps = ipConfiguration.asObject().get("properties").asObject();
+                    String privateIp = ipProps.getString("privateIPAddress", null);
+                    ipAddresses.add(privateIp);
+                }
             }
         }
 

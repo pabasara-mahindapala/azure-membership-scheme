@@ -28,7 +28,6 @@ import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
@@ -49,14 +48,7 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
 
     @Override
     @SuppressFBWarnings(value = "URLCONNECTION_SSRF_FD", justification = "URL is built with constants.")
-    public void createConnection() throws AzureMembershipSchemeException {
-
-        URL url;
-        try {
-            url = new URL(urlForIpList());
-        } catch (MalformedURLException e) {
-            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, null, e);
-        }
+    public void createConnection(URL url) throws AzureMembershipSchemeException {
 
         log.debug("Connecting to Azure API server");
         try {
@@ -83,18 +75,6 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
 
         AzureAuthenticator azureAuthenticator = new AzureAuthenticator(getParameters());
         return azureAuthenticator.acquireToken().accessToken();
-    }
-
-    private String urlForIpList() throws AzureMembershipSchemeException {
-
-        return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
-                        + "/publicIPAddresses?api-version=%s",
-                Utils.getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
-                        getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null, getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
-                        getParameters()));
     }
 
     public URL getEndpoint() {
