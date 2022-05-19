@@ -5,7 +5,7 @@ Azure membership scheme provides features for automatically discovering WSO2 Car
 ### How It Works
 
 Once a Carbon server starts it will query IP addresses in the given cluster via Azure API or Azure SDK using the given
-Azure services. Thereafter Hazelcast network configuration will be updated with the above IP addresses. As a result the
+Azure services. Thereafter, Hazelcast network configuration will be updated with the above IP addresses. As a result the
 Hazelcast instance will get connected to all the other members in the cluster. In addition, once a new member is added
 to the cluster, all the other members will get connected to the new member.
 
@@ -21,9 +21,24 @@ to the cluster, all the other members will get connected to the new member.
    the Carbon version of a particular product, please refer to
    the [WSO2 Release Matrix](http://wso2.com/products/carbon/release-matrix/)).
 
-2. Copy following JAR files to the `repository/components/dropins` directory of the Carbon server:
+2. Copy following JAR files to the `<carbon_home>/repository/components/dropins` directory of the Carbon server:
    ```
       azure-membership-scheme-1.0.0.jar
+   ```
+
+3. Since Azure SDK is using the Java service loader, and it is not OSGI compatible, we have
+   used [Apache Aries SPI Fly](https://aries.apache.org/documentation/modules/spi-fly.html) as a resolution. Run the
+   [p2-maven-plugin](https://github.com/reficio/p2-maven-plugin) using the following command in
+   the `azure-membership-scheme` directory in order to generate the required dependencies.
+   ```
+      mvn p2:site
+   ```
+
+   Then copy the following files from `azure-membership-scheme/target/repository/plugins` to
+   the `<carbon_home>/repository/components/dropins` directory.
+   ```
+      com.azure.core_1.22.0.jar
+      com.azure.core-http-okhttp_1.7.6.jar
    ```
 
 The Azure membership scheme supports finding the IPs in two ways:
