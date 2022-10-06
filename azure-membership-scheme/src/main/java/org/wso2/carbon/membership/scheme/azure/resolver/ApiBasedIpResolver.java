@@ -22,6 +22,7 @@ import com.hazelcast.internal.json.Json;
 import com.hazelcast.internal.json.JsonObject;
 import com.hazelcast.internal.json.JsonValue;
 import org.apache.axis2.description.Parameter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.membership.scheme.azure.Constants;
@@ -29,7 +30,6 @@ import org.wso2.carbon.membership.scheme.azure.Utils;
 import org.wso2.carbon.membership.scheme.azure.api.AzureApiEndpoint;
 import org.wso2.carbon.membership.scheme.azure.api.AzureHttpsApiEndpoint;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
-import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -57,17 +57,17 @@ public class ApiBasedIpResolver extends AddressResolver {
         AzureApiEndpoint apiEndpoint = new AzureHttpsApiEndpoint(getParameters());
 
         String usePublicIPAddresses =
-                Utils.getParameterValue(Constants.PARAMETER_NAME_USE_PUBLIC_IP_ADDRESSES, "false", getParameters());
+                Utils.getParameterValueOrNull(Constants.PARAMETER_NAME_USE_PUBLIC_IP_ADDRESSES, getParameters());
 
         try {
             if (StringUtils.isEmpty(usePublicIPAddresses) || !Boolean.parseBoolean(usePublicIPAddresses)) {
                 log.debug("Using private IP addresses");
 
-                ipAddresses = parsePrivateIpResponse(connectAndRead(apiEndpoint, urlForPrivateIpList()));
+                ipAddresses = parsePrivateIpResponse(connectAndRead(apiEndpoint, buildUrlForPrivateIpList()));
             } else {
                 log.debug("Using public IP addresses");
 
-                ipAddresses = parsePublicIpResponse(connectAndRead(apiEndpoint, urlForPublicIpList()));
+                ipAddresses = parsePublicIpResponse(connectAndRead(apiEndpoint, buildUrlForPublicIpList()));
             }
         } finally {
             apiEndpoint.disconnect();
@@ -88,21 +88,21 @@ public class ApiBasedIpResolver extends AddressResolver {
             endpoint.createConnection(new URL(urlForIpList));
             return endpoint.read();
         } catch (MalformedURLException e) {
-            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, null, e);
+            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_CREATE_URL, e);
         } catch (IOException e) {
-            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_READ_API, null, e);
+            throw Utils.handleException(Constants.ErrorMessage.COULD_NOT_READ_API, e);
         }
     }
 
-    private String urlForPublicIpList() throws AzureMembershipSchemeException {
+    private String buildUrlForPublicIpList() throws AzureMembershipSchemeException {
 
         return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
                         + "/publicIPAddresses?api-version=%s",
-                Utils.getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
+                Utils.getParameterValueOrDefault(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
                         getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null, getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
+                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, getParameters()),
+                Utils.getParameterValueOrDefault(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
                         getParameters()));
     }
 
@@ -110,9 +110,10 @@ public class ApiBasedIpResolver extends AddressResolver {
 
         HashSet<String> ipAddresses = new HashSet<>();
 
-        for (JsonValue item : Utils.toJsonArray(Json.parse(response).asObject().get("value"))) {
-            String publicIp = Utils.toJsonObject(item.asObject().get("properties")).getString("ipAddress", null);
-            if (Utils.isNotNullOrEmptyAfterTrim(publicIp)) {
+        for (JsonValue item : Utils.toJsonArray(Json.parse(response).asObject().get(Constants.VALUE))) {
+            String publicIp =
+                    Utils.toJsonObject(item.asObject().get(Constants.PROPERTIES)).getString(Constants.IP_ADDRESS, null);
+            if (StringUtils.isNotBlank(publicIp)) {
                 ipAddresses.add(publicIp);
             }
         }
@@ -120,15 +121,15 @@ public class ApiBasedIpResolver extends AddressResolver {
         return ipAddresses;
     }
 
-    private String urlForPrivateIpList() throws AzureMembershipSchemeException {
+    private String buildUrlForPrivateIpList() throws AzureMembershipSchemeException {
 
         return String.format("%s/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network"
                         + "/networkInterfaces?api-version=%s",
-                Utils.getParameterValue(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
+                Utils.getParameterValueOrDefault(Constants.PARAMETER_NAME_API_ENDPOINT, Constants.DEFAULT_API_ENDPOINT,
                         getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, null, getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()),
-                Utils.getParameterValue(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
+                Utils.getParameterValue(Constants.PARAMETER_NAME_SUBSCRIPTION_ID, getParameters()),
+                Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, getParameters()),
+                Utils.getParameterValueOrDefault(Constants.PARAMETER_NAME_API_VERSION, Constants.DEFAULT_API_VERSION,
                         getParameters()));
     }
 
@@ -136,12 +137,12 @@ public class ApiBasedIpResolver extends AddressResolver {
 
         HashSet<String> ipAddresses = new HashSet<>();
 
-        for (JsonValue item : Utils.toJsonArray(Json.parse(response).asObject().get("value"))) {
-            JsonObject properties = item.asObject().get("properties").asObject();
-            if (properties.get("virtualMachine") != null) {
-                for (JsonValue ipConfiguration : Utils.toJsonArray(properties.get("ipConfigurations"))) {
-                    JsonObject ipProps = ipConfiguration.asObject().get("properties").asObject();
-                    String privateIp = ipProps.getString("privateIPAddress", null);
+        for (JsonValue item : Utils.toJsonArray(Json.parse(response).asObject().get(Constants.VALUE))) {
+            JsonObject properties = item.asObject().get(Constants.PROPERTIES).asObject();
+            if (properties.get(Constants.VIRTUAL_MACHINE) != null) {
+                for (JsonValue ipConfiguration : Utils.toJsonArray(properties.get(Constants.IP_CONFIGURATIONS))) {
+                    JsonObject ipProps = ipConfiguration.asObject().get(Constants.PROPERTIES).asObject();
+                    String privateIp = ipProps.getString(Constants.PRIVATE_IP_ADDRESS, null);
                     ipAddresses.add(privateIp);
                 }
             }

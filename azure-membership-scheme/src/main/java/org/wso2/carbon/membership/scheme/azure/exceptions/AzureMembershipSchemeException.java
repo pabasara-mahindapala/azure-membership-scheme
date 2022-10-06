@@ -47,11 +47,21 @@ public class AzureMembershipSchemeException extends Exception {
         this.description = description;
     }
 
+    /**
+     * Get Description.
+     *
+     * @return Description
+     */
     public String getDescription() {
 
         return description;
     }
 
+    /**
+     * Set Description.
+     *
+     * @param description
+     */
     public void setDescription(String description) {
 
         this.description = description;

@@ -55,10 +55,11 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
             connection = (HttpsURLConnection) url.openConnection();
             this.endpoint = url;
         } catch (IOException e) {
-            throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_CONNECT, null, e);
+            throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_CONNECT, e);
         }
-        connection.addRequestProperty(Constants.AUTHORIZATION_HEADER, "Bearer " + getAccessToken());
-        log.debug("Connected successfully");
+        connection.addRequestProperty(Constants.AUTHORIZATION_HEADER,
+                String.format("%s %s", Constants.BEARER, getAccessToken()));
+        log.debug("Connected to Azure API server successfully");
     }
 
     @Override
@@ -68,12 +69,12 @@ public class AzureHttpsApiEndpoint extends AzureApiEndpoint {
         if (connection != null) {
             connection.disconnect();
         }
-        log.debug("Disconnected successfully");
+        log.debug("Disconnected from Azure API server successfully");
     }
 
     private String getAccessToken() throws AzureMembershipSchemeException {
 
-        AzureAuthenticator azureAuthenticator = new AzureAuthenticator(getParameters());
+        AzureAuthenticator azureAuthenticator = AzureAuthenticator.getInstance(getParameters());
         return azureAuthenticator.acquireToken().accessToken();
     }
 

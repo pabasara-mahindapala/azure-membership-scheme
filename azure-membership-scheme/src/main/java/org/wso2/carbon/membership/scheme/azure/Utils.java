@@ -32,6 +32,13 @@ import java.util.Map;
  */
 public class Utils {
 
+    /**
+     * Handle Exception and throw AzureMembershipSchemeException.
+     *
+     * @param errorMessage Error Message
+     * @param data         Data
+     * @return AzureMembershipSchemeException
+     */
     public static AzureMembershipSchemeException handleException(Constants.ErrorMessage errorMessage, String data) {
 
         String description;
@@ -43,20 +50,39 @@ public class Utils {
         return new AzureMembershipSchemeException(errorMessage.getMessage(), description);
     }
 
-    public static AzureMembershipSchemeException handleException(Constants.ErrorMessage errorMessage, String data,
-                                                                 Throwable cause) {
+    /**
+     * Handle Exception and throw AzureMembershipSchemeException.
+     *
+     * @param errorMessage Error Message
+     * @return AzureMembershipSchemeException
+     */
+    public static AzureMembershipSchemeException handleException(Constants.ErrorMessage errorMessage) {
 
-        String description;
-        if (StringUtils.isNotBlank(data)) {
-            description = String.format(errorMessage.getDescription(), data);
-        } else {
-            description = errorMessage.getDescription();
-        }
+        return new AzureMembershipSchemeException(errorMessage.getMessage(), errorMessage.getDescription());
+    }
+
+    /**
+     * Handle Exception and throw AzureMembershipSchemeException.
+     *
+     * @param errorMessage Error Message
+     * @param cause        Throwable cause
+     * @return AzureMembershipSchemeException
+     */
+    public static AzureMembershipSchemeException handleException(Constants.ErrorMessage errorMessage, Throwable cause) {
+
+        String description = errorMessage.getDescription();
         return new AzureMembershipSchemeException(errorMessage.getMessage(), description, cause);
     }
 
-    public static String getParameterValue(String parameterName, String defaultValue,
-                                           Map<String, Parameter> parameters)
+    /**
+     * @param parameterName Name of the parameter
+     * @param defaultValue  Default value
+     * @param parameters    Map of parameters
+     * @return Value of the parameter, or the default value
+     * @throws AzureMembershipSchemeException if the default value is null
+     */
+    public static String getParameterValueOrDefault(String parameterName, String defaultValue,
+                                                    Map<String, Parameter> parameters)
             throws AzureMembershipSchemeException {
 
         Parameter azureServicesParam = parameters.get(parameterName);
@@ -67,14 +93,56 @@ public class Utils {
                 return defaultValue;
             }
         }
-        return (String) azureServicesParam.getValue();
+        return String.valueOf(azureServicesParam.getValue());
     }
 
+    /**
+     * @param parameterName Name of the parameter
+     * @param parameters    Map of parameters
+     * @return Value of the parameter
+     * @throws AzureMembershipSchemeException if the parameter is not found
+     */
+    public static String getParameterValue(String parameterName, Map<String, Parameter> parameters)
+            throws AzureMembershipSchemeException {
+
+        Parameter azureServicesParam = parameters.get(parameterName);
+        if (azureServicesParam == null) {
+            throw Utils.handleException(Constants.ErrorMessage.PARAMETER_NOT_FOUND, parameterName);
+        }
+        return String.valueOf(azureServicesParam.getValue());
+    }
+
+    /**
+     * @param parameterName Name of the parameter
+     * @param parameters    Map of parameters
+     * @return Value of the parameter, or null if the parameter is not found
+     */
+    public static String getParameterValueOrNull(String parameterName, Map<String, Parameter> parameters) {
+
+        Parameter azureServicesParam = parameters.get(parameterName);
+        if (azureServicesParam == null) {
+            return null;
+        }
+        return String.valueOf(azureServicesParam.getValue());
+    }
+
+    /**
+     * Check a String is Not Null or Empty After Trim.
+     *
+     * @param s
+     * @return True or false
+     */
     public static boolean isNotNullOrEmptyAfterTrim(String s) {
 
         return s != null && !s.trim().isEmpty();
     }
 
+    /**
+     * Convert JsonValue to JsonArray.
+     *
+     * @param jsonValue JsonValue
+     * @return JsonArray
+     */
     public static JsonArray toJsonArray(JsonValue jsonValue) {
 
         if (jsonValue == null || jsonValue.isNull()) {
@@ -84,6 +152,12 @@ public class Utils {
         }
     }
 
+    /**
+     * Convert JsonValue to JsonObject.
+     *
+     * @param jsonValue JsonValue
+     * @return JsonObject
+     */
     public static JsonObject toJsonObject(JsonValue jsonValue) {
 
         if (jsonValue == null || jsonValue.isNull()) {

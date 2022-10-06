@@ -52,14 +52,14 @@ public class SdkBasedIpResolver extends AddressResolver {
 
     private void initialize() throws AzureMembershipSchemeException {
 
-        AzureAuthenticator azureAuthenticator = new AzureAuthenticator(getParameters());
+        AzureAuthenticator azureAuthenticator = AzureAuthenticator.getInstance(getParameters());
 
         try {
             AzureProfile profile = azureAuthenticator.getAzureProfile();
             TokenCredential credential = azureAuthenticator.getClientSecretCredential();
             networkManager = NetworkManager.authenticate(credential, profile);
         } catch (Exception e) {
-            throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_AUTHENTICATE_COMPUTEMANAGER, null, e);
+            throw Utils.handleException(Constants.ErrorMessage.FAILED_TO_AUTHENTICATE_COMPUTEMANAGER, e);
         }
     }
 
@@ -69,13 +69,13 @@ public class SdkBasedIpResolver extends AddressResolver {
         Set<String> ipAddresses;
 
         String usePublicIPAddresses =
-                Utils.getParameterValue(Constants.PARAMETER_NAME_USE_PUBLIC_IP_ADDRESSES, "false", getParameters());
+                Utils.getParameterValueOrNull(Constants.PARAMETER_NAME_USE_PUBLIC_IP_ADDRESSES, getParameters());
 
         if (StringUtils.isEmpty(usePublicIPAddresses) || !Boolean.parseBoolean(usePublicIPAddresses)) {
             log.debug("Using private IP addresses");
 
             ipAddresses = networkManager.networkInterfaces().listByResourceGroup(
-                            Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()))
+                            Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, getParameters()))
                     .stream()
                     .map(NetworkInterfaceBase::primaryPrivateIP)
                     .filter(Utils::isNotNullOrEmptyAfterTrim)
@@ -84,7 +84,7 @@ public class SdkBasedIpResolver extends AddressResolver {
             log.debug("Using public IP addresses");
 
             ipAddresses = networkManager.publicIpAddresses().listByResourceGroup(
-                            Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, null, getParameters()))
+                            Utils.getParameterValue(Constants.PARAMETER_NAME_RESOURCE_GROUP, getParameters()))
                     .stream()
                     .map(PublicIpAddress::ipAddress)
                     .filter(Utils::isNotNullOrEmptyAfterTrim)
@@ -95,7 +95,7 @@ public class SdkBasedIpResolver extends AddressResolver {
             log.debug(String.format("Found %s IP addresses", ipAddresses.size()));
             return ipAddresses;
         } else {
-            throw Utils.handleException(Constants.ErrorMessage.NO_IPS_FOUND, null);
+            throw Utils.handleException(Constants.ErrorMessage.NO_IPS_FOUND);
         }
     }
 }

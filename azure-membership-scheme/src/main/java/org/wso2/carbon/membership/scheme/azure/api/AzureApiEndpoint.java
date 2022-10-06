@@ -19,6 +19,7 @@
 package org.wso2.carbon.membership.scheme.azure.api;
 
 import org.apache.axis2.description.Parameter;
+import org.wso2.carbon.membership.scheme.azure.Constants;
 import org.wso2.carbon.membership.scheme.azure.exceptions.AzureMembershipSchemeException;
 
 import java.io.IOException;
@@ -42,28 +43,59 @@ public abstract class AzureApiEndpoint {
         this.parameters = parameters;
     }
 
+    /**
+     * Connecting to Azure API server.
+     *
+     * @param url
+     * @throws AzureMembershipSchemeException
+     */
     public abstract void createConnection(URL url) throws AzureMembershipSchemeException;
 
+    /**
+     * Disconnecting from Azure API server.
+     */
     public abstract void disconnect();
 
+    /**
+     * Get Endpoint.
+     *
+     * @return
+     */
     public abstract URL getEndpoint();
 
+    /**
+     * Read from the endpoint.
+     *
+     * @return
+     * @throws IOException
+     */
     public String read() throws IOException {
 
         InputStream stream = null;
-        if (connection != null) {
-            stream = connection.getInputStream();
-        }
+        try {
+            if (connection != null) {
+                stream = connection.getInputStream();
+            }
 
-        if (stream == null) {
-            return null;
-        }
+            if (stream == null) {
+                return null;
+            }
 
-        Scanner scanner = new Scanner(stream, "UTF-8");
-        scanner.useDelimiter("\\Z");
-        return scanner.next();
+            Scanner scanner = new Scanner(stream, Constants.CHARSET_NAME);
+            scanner.useDelimiter("\\Z");
+            return scanner.next();
+        } finally {
+            if (stream != null) {
+                stream.close();
+            }
+        }
     }
 
+    /**
+     * Get the map of parameters.
+     *
+     * @return Map of parameters
+     */
     public Map<String, Parameter> getParameters() {
 
         return parameters;

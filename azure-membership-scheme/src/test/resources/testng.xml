@@ -19,8 +19,8 @@
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Kubernetes_Membership_Scheme_Test_Suite">
-    <test name="Kubernetes-clustering-membership-scheme-mock-tests" preserve-order="true" parallel="false" verbose="10">
+<suite name="Azure_Membership_Scheme_Test_Suite">
+    <test name="Azure-clustering-membership-scheme-mock-tests" preserve-order="true" parallel="false" verbose="10">
         <packages>
             <package name="org.wso2.carbon.membership.scheme.azure.test.*"/>
         </packages>

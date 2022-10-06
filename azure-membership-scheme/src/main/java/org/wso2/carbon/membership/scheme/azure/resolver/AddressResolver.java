@@ -44,6 +44,11 @@ public abstract class AddressResolver {
      */
     public abstract Set<String> resolveAddresses() throws AzureMembershipSchemeException;
 
+    /**
+     * Get the map of parameters.
+     *
+     * @return Map of parameters
+     */
     public Map<String, Parameter> getParameters() {
 
         return parameters;

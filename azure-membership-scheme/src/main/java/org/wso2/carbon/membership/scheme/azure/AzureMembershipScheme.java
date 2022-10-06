@@ -42,7 +42,6 @@ import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,17 +69,32 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
         this.nwConfig = config.getNetworkConfig();
     }
 
+    /**
+     * Set Primary Hazelcast Instance.
+     *
+     * @param primaryHazelcastInstance
+     */
     @Override
     public void setPrimaryHazelcastInstance(HazelcastInstance primaryHazelcastInstance) {
 
         this.primaryHazelcastInstance = primaryHazelcastInstance;
     }
 
+    /**
+     * Set Local Member.
+     *
+     * @param localMember
+     */
     @Override
     public void setLocalMember(Member localMember) {
 
     }
 
+    /**
+     * Set Carbon Cluster.
+     *
+     * @param hazelcastCarbonCluster
+     */
     @Override
     public void setCarbonCluster(HazelcastCarbonClusterImpl hazelcastCarbonCluster) {
 
@@ -93,7 +107,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
      */
     private void initIpResolver() throws AzureMembershipSchemeException {
 
-        String useSDK = Utils.getParameterValue(Constants.PARAMETER_NAME_USE_SDK, "false", parameters);
+        String useSDK = Utils.getParameterValueOrNull(Constants.PARAMETER_NAME_USE_SDK, parameters);
 
         if (StringUtils.isEmpty(useSDK) || !Boolean.parseBoolean(useSDK)) {
             log.debug("Using API based ip resolving method");
@@ -104,16 +118,22 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
         }
     }
 
+    /**
+     * Get Azure IP Addresses from the IP resolver.
+     *
+     * @return Azure IP Addresses
+     * @throws AzureMembershipSchemeException
+     */
     private Set<String> getAzureIpAddresses() throws AzureMembershipSchemeException {
 
-        Set<String> azureIPs = ipResolver.resolveAddresses();
-        if (azureIPs != null) {
-            return azureIPs;
-        } else {
-            return Collections.emptySet();
-        }
+        return ipResolver.resolveAddresses();
     }
 
+    /**
+     * Initialize the Azure membership scheme.
+     *
+     * @throws ClusteringFault
+     */
     @Override
     public void init() throws ClusteringFault {
 
@@ -127,7 +147,7 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
             Set<String> azureIPs = getAzureIpAddresses();
             // if no IPs are found, can't initialize clustering
             if (azureIPs.isEmpty()) {
-                throw Utils.handleException(Constants.ErrorMessage.NO_MEMBERS_FOUND, null);
+                throw Utils.handleException(Constants.ErrorMessage.NO_MEMBERS_FOUND);
             }
 
             for (String azureIP : azureIPs) {
@@ -144,6 +164,9 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
         }
     }
 
+    /**
+     * Add the Azure Membership Listener.
+     */
     @Override
     public void joinGroup() {
 
@@ -155,6 +178,11 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
      */
     private class AzureMembershipSchemeListener implements MembershipListener {
 
+        /**
+         * A member joined the cluster.
+         *
+         * @param membershipEvent
+         */
         @Override
         public void memberAdded(MembershipEvent membershipEvent) {
 
@@ -180,30 +208,38 @@ public class AzureMembershipScheme implements HazelcastMembershipScheme {
             }
         }
 
+        /**
+         * A member left the cluster.
+         *
+         * @param membershipEvent
+         */
         @Override
         public void memberRemoved(MembershipEvent membershipEvent) {
 
             Member member = membershipEvent.getMember();
             carbonCluster.memberRemoved(member);
             TcpIpConfig tcpIpConfig = nwConfig.getJoin().getTcpIpConfig();
-            Set<String> azureIPs;
             String memberIp = member.getSocketAddress().getAddress().getHostAddress();
             try {
-                azureIPs = getAzureIpAddresses();
-                if (!azureIPs.contains(memberIp)) {
+                if (tcpIpConfig.getMembers().contains(memberIp)) {
                     tcpIpConfig.getMembers()
-                            .remove(String.valueOf(member.getSocketAddress().getAddress().getHostAddress()));
+                            .remove(String.valueOf(memberIp));
                     log.info(String.format("Member left: [UUID] %s, [Address] %s", member.getUuid(),
                             member.getSocketAddress().toString()));
                     if (log.isDebugEnabled()) {
                         log.debug(String.format("Current member list: %s", tcpIpConfig.getMembers()));
                     }
                 }
-            } catch (AzureMembershipSchemeException e) {
+            } catch (Exception e) {
                 log.error(String.format("Could not remove member: %s", memberIp), e);
             }
         }
 
+        /**
+         * Member attribute changed.
+         *
+         * @param memberAttributeEvent
+         */
         @Override
         public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
 
