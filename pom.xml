@@ -17,7 +17,7 @@
   ~ under the License.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -26,36 +26,181 @@
         <version>5.1</version>
     </parent>
 
-    <groupId>org.wso2.carbon.azure.artifacts</groupId>
-    <artifactId>wso2-azure-artifacts</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
-    <name>WSO2 Azure Artifacts</name>
-    <description>WSO2 Azure Artifacts</description>
+    <groupId>org.wso2.carbon.membership.scheme.azure</groupId>
+    <artifactId>azure-membership-scheme</artifactId>
+    <name>WSO2 Azure Membership Scheme</name>
+    <version>1.0.0</version>
+    <description>Azure Membership Scheme for WSO2 Carbon Clusters</description>
+    <packaging>bundle</packaging>
 
-    <licenses>
-        <license>
-            <name>Apache License Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        </license>
-    </licenses>
+    <properties>
+        <carbon.version>4.5.3</carbon.version>
+        <hazelcast.version>3.12.2.wso2v1</hazelcast.version>
+        <axis2.version>1.6.1-wso2v40</axis2.version>
+        <commons.logging.version>1.1.1</commons.logging.version>
+        <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
+        <azure.resourcemanager.version>2.10.0</azure.resourcemanager.version>
+        <azure.identity.version>1.4.2</azure.identity.version>
+        <azure.core.http.okhttp.version>1.7.6</azure.core.http.okhttp.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.sourceEncoding>UTF-8</project.reporting.sourceEncoding>
+        <validation.script.dir>${project.basedir}/../</validation.script.dir>
+        <maven.findbugs.plugin.version>3.0.4</maven.findbugs.plugin.version>
+        <maven.findbugsplugin.exclude.file>findbugs-exclude-filter.xml</maven.findbugsplugin.exclude.file>
+        <maven.bundle.plugin.version>3.5.0</maven.bundle.plugin.version>
+    </properties>
 
-    <modules>
-        <module>azure-membership-scheme</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+            <version>${carbon.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>${hazelcast.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.axis2.wso2</groupId>
+            <artifactId>axis2</artifactId>
+            <version>${axis2.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>${commons.logging.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.azure.resourcemanager</groupId>
+            <artifactId>azure-resourcemanager</artifactId>
+            <version>${azure.resourcemanager.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-core-http-okhttp</artifactId>
+            <version>${azure.core.http.okhttp.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-identity</artifactId>
+            <version>${azure.identity.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.azure</groupId>
+                    <artifactId>azure-core-http-netty</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <version>1.22.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
                 <configuration>
-                    <preparationGoals>clean install</preparationGoals>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Name>${project.artifactId}</Bundle-Name>
+                        <Export-Package>
+                            org.wso2.carbon.membership.scheme.azure.*,
+                        </Export-Package>
+                        <Import-Package>
+                            com.azure.core.http.netty.*; version=[1.0.0,2.0.0],
+                            org.apache.commons.logging; version=0.0.0,
+                            org.xbill.DNS.*; version=0.0.0,
+                            *;resolution:=optional
+                        </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
+                        <Embed-Dependency>
+                            *;scope=compile|runtime
+                        </Embed-Dependency>
+                    </instructions>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <excludeScope>provided</excludeScope>
+                            <outputDirectory>${project.build.directory}/dependencies
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <descriptor>package.xml</descriptor>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>create-archive</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.reficio</groupId>
+                <artifactId>p2-maven-plugin</artifactId>
+                <version>1.7.0</version>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <configuration>
+                            <artifacts>
+                                <dependency>
+                                    <id>com.azure:azure-core:1.22.0</id>
+                                    <source>true</source>
+                                    <transitive>false</transitive>
+                                    <instructions>
+                                        <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.processor)",
+                                            osgi.serviceloader; filter:="(osgi.serviceloader=com.azure.core.http.HttpClientProvider)"; cardinality:=multiple</Require-Capability>
+                                    </instructions>
+                                </dependency>
+                                <dependency>
+                                    <id>com.azure:azure-core-http-okhttp:1.7.6</id>
+                                    <source>true</source>
+                                    <transitive>true</transitive>
+                                    <instructions>
+                                        <Require-Capability>osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>
+                                        <Provide-Capability>osgi.serviceloader; osgi.serviceloader=com.azure.core.http.HttpClientProvider</Provide-Capability>
+                                    </instructions>
+                                </dependency>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -71,9 +216,6 @@
                     <extensions>true</extensions>
                     <configuration>
                         <obrRepository>NONE</obrRepository>
-                        <!--<instructions>
-                          <_include>-osgi.bnd</_include>
-                        </instructions>-->
                     </configuration>
                 </plugin>
                 <plugin>
@@ -88,7 +230,7 @@
                         </findbugsXmlOutputDirectory>
 
                         <!--Exclude sources -->
-                        <excludeFilterFile>${mavan.findbugsplugin.exclude.file}
+                        <excludeFilterFile>${maven.findbugsplugin.exclude.file}
                         </excludeFilterFile>
                         <plugins>
                             <plugin>
@@ -109,206 +251,7 @@
                         </execution>
                     </executions>
                 </plugin>
-
             </plugins>
         </pluginManagement>
     </build>
-
-    <profiles>
-        <profile>
-            <!-- pedantic profile to run RAT plugin -->
-            <id>pedantic</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.rat</groupId>
-                        <artifactId>apache-rat-plugin</artifactId>
-                        <configuration>
-                            <licenses>
-                                <license implementation="org.apache.rat.analysis.license.SimplePatternBasedLicense">
-                                    <licenseFamilyCategory>WSO2</licenseFamilyCategory>
-                                    <licenseFamilyName>WSO2 License 1.0</licenseFamilyName>
-                                    <notes/>
-                                    <patterns>
-                                        <pattern>Copyright WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-                                        </pattern>
-                                        <pattern>WSO2 Inc. (http://www.wso2.org) All Rights Reserved.</pattern>
-                                        <pattern>WSO2, Inc. http://www.wso2.org</pattern>
-                                        <pattern>WSO2 Inc. (http://wso2.com) All Rights Reserved.</pattern>
-                                        <pattern>WSO2, Inc. (http://wso2.com)</pattern>
-                                    </patterns>
-                                </license>
-                                <!-- <license implementation="org.apache.rat.analysis.license.ApacheSoftwareLicense20" /> -->
-                            </licenses>
-                            <licenseFamilies>
-                                <licenseFamily implementation="org.apache.rat.license.SimpleLicenseFamily">
-                                    <familyName>WSO2 License 1.0</familyName>
-                                </licenseFamily>
-                                <!-- <licenseFamily implementation="org.apache.rat.license.Apache20LicenseFamily" /> -->
-                            </licenseFamilies>
-                            <excludes>
-                                <exclude>**/target/**/*</exclude>
-                                <exclude>**/.settings/**/*</exclude>
-                                <exclude>**/.project</exclude>
-                                <exclude>**/.classpath</exclude>
-                                <exclude>**/.git/**/*</exclude>
-                                <exclude>**/README.md</exclude>
-                                <exclude>**/*.iml</exclude>
-                                <exclude>**/*.iws</exclude>
-                                <exclude>**/*.ipr</exclude>
-                                <exclude>**/.gitignore</exclude>
-                                <exclude>**/.gitkeep</exclude>
-                                <exclude>**/*.key</exclude>
-                                <exclude>**/*.json</exclude>
-                                <exclude>**/*.json.erb</exclude>
-                                <!-- because of an IS json config file -->
-                                <exclude>**/*.config.erb</exclude>
-                                <exclude>**/.idea/**/*</exclude>
-                                <exclude>**/.idea</exclude>
-                                <exclude>**/tlds/**/*</exclude>
-                                <exclude>**/*.log</exclude>
-                                <exclude>**/.gitmodules</exclude>
-                            </excludes>
-                            <excludeSubProjects>false</excludeSubProjects>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>check</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
-    <scm>
-        <url>https://github.com/pabasara-mahindapala/azure-common.git</url>
-        <developerConnection>scm:git:https://github.com/pabasara-mahindapala/azure-common.git</developerConnection>
-        <connection>scm:git:https://github.com/pabasara-mahindapala/azure-common.git</connection>
-        <tag>HEAD</tag>
-    </scm>
-
-    <pluginRepositories>
-
-        <pluginRepository>
-            <id>wso2.releases</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/releases/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </pluginRepository>
-
-        <pluginRepository>
-            <id>wso2.snapshots</id>
-            <name>Apache Snapshot Repository</name>
-            <url>http://maven.wso2.org/nexus/content/repositories/snapshots/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </pluginRepository>
-
-        <pluginRepository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </pluginRepository>
-
-    </pluginRepositories>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.core</artifactId>
-                <version>${carbon.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.orbit.com.hazelcast</groupId>
-                <artifactId>hazelcast</artifactId>
-                <version>${hazelcast.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2.wso2</groupId>
-                <artifactId>axis2</artifactId>
-                <version>${axis2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons.logging.version}</version>
-            </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--                <artifactId>jackson-core</artifactId>-->
-<!--                <version>${jackson.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--                <artifactId>jackson-databind</artifactId>-->
-<!--                <version>${jackson.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--                <artifactId>jackson-annotations</artifactId>-->
-<!--                <version>${jackson.version}</version>-->
-<!--            </dependency>-->
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-            </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.mock-server</groupId>-->
-<!--                <artifactId>mockserver-netty</artifactId>-->
-<!--                <version>${mockserver.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>dnsjava</groupId>-->
-<!--                <artifactId>dnsjava</artifactId>-->
-<!--                <version>${dnsjava.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>com.azure</groupId>-->
-<!--                <artifactId>azure-sdk-bom</artifactId>-->
-<!--                <version>1.0.5</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
-        </dependencies>
-    </dependencyManagement>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <validation.script.dir>${project.basedir}</validation.script.dir>
-        <!-- dependencies-->
-        <axis2.version>1.6.1-wso2v40</axis2.version>
-        <carbon.version>4.5.3</carbon.version>
-        <commons.logging.version>1.1.1</commons.logging.version>
-        <dnsjava.version>2.1.8</dnsjava.version>
-        <hazelcast.version>3.12.2.wso2v1</hazelcast.version>
-        <jackson.version>2.12.3</jackson.version>
-        <maven.bundle.plugin.version>3.5.0</maven.bundle.plugin.version>
-        <maven.findbugs.plugin.version>3.0.4</maven.findbugs.plugin.version>
-        <mavan.findbugsplugin.exclude.file>findbugs-exclude-filter.xml</mavan.findbugsplugin.exclude.file>
-        <mockserver.version>3.10.4</mockserver.version>
-        <ppaas.version>4.1.5</ppaas.version>
-        <project.scm.id>my-scm-server</project.scm.id>
-        <testng.version>6.9.9</testng.version>
-    </properties>
 </project>
