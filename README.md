@@ -31,7 +31,7 @@ Following two approaches can be used for discovering Azure IP addresses.
       mvn clean install
    ```
 
-2. Copy following JAR file to the `<carbon_home>/repository/components/dropins` directory of the Carbon server:
+2. Copy following JAR file to the `<carbon_home>/repository/components/lib` directory of the Carbon server:
    ```
       azure-membership-scheme-1.0.0.jar
    ```
