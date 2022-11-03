@@ -1,6 +1,6 @@
 ## Azure Membership Scheme
 
-Azure membership scheme provides features for automatically discovering WSO2 Carbon server clusters on Azure.
+Azure membership scheme provides features for automatically discovering WSO2 Carbon server clusters on Azure (Read the blog [here](https://towardsdev.com/running-wso2-products-on-azure-with-azure-membership-scheme-3175113d8e10)).
 
 ### How It Works
 
