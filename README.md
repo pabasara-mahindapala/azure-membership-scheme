@@ -22,7 +22,7 @@ An access token will be acquired from Azure using the provided client credential
 API is called. IP addresses of the virtual machines are parsed from the response and provided to the Hazelcast network
 configuration.
 
-3. Using the Azure SDK
+2. Using the Azure SDK
 
 Azure NetworkManager class from the Java SDK is authenticated with the provided client credentials, and it is used to
 query IP addresses of the virtual machines from the resource group. Then the IP addresses will be provided to the
