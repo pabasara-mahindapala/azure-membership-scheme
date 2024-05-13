@@ -16,7 +16,7 @@ the [WSO2 Release Matrix](http://wso2.com/products/carbon/release-matrix/)).
 
 Following two approaches can be used for discovering Azure IP addresses.
 
-1. Using the Azure REST API
+1. Using the Azure REST API (Recommended)
 
 An access token will be acquired from Azure using the provided client credentials and using the access token, Azure REST
 API is called. IP addresses of the virtual machines are parsed from the response and provided to the Hazelcast network
